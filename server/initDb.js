@@ -14,8 +14,12 @@ db.serialize(() => {
 
     // Insert sample data
     const sampleProducts = [
-        ['Product 1', 99.99, 'Description for product 1'],
-        ['Product 2', 149.99, 'Description for product 2']
+        ['Premium Coffee Maker', 199.99, 'Automatic drip coffee maker with built-in grinder'],
+        ['Wireless Headphones', 149.99, 'Noise-cancelling Bluetooth headphones with 30-hour battery'],
+        ['Smart Watch', 299.99, 'Fitness tracking and notifications with OLED display'],
+        ['Laptop Backpack', 79.99, 'Water-resistant backpack with USB charging port'],
+        ['Mechanical Keyboard', 129.99, 'RGB backlit mechanical gaming keyboard with Cherry MX switches'],
+        ['Portable Speaker', 89.99, 'Waterproof Bluetooth speaker with 20-hour playtime']
     ];
 
     const insert = db.prepare('INSERT INTO products (name, price, description) VALUES (?, ?, ?)');

@@ -58,8 +58,11 @@ This is a simple shopping website that allows users to browse products and manag
   ```javascript
   // Sample products in initDb.js
   const sampleProducts = [
-      ['Product 1', 99.99, 'Description for product 1'],
-      ['Product 2', 149.99, 'Description for product 2']
+      ['Wireless Earbuds', 79.99, 'High quality wireless earbuds with noise cancellation'],
+      ['Smart Watch', 199.99, 'Fitness tracking smartwatch with heart rate monitor'],
+      ['Laptop Backpack', 49.99, 'Water-resistant laptop backpack with USB charging port'],
+      ['Bluetooth Speaker', 89.99, 'Portable wireless speaker with 20hr battery life'],
+      ['Phone Charger', 24.99, 'Fast charging USB-C power adapter with cable']
   ];
   ```
 
