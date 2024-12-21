@@ -1,7 +1,11 @@
 import React from 'react';
+import { useCart } from '../context/CartContext';
 import './Header.css';
 
-const Header = ({ onCartClick, cartItemCount = 0 }) => {
+const Header = ({ onCartClick }) => {
+    const { cartItems } = useCart();
+    const cartItemCount = cartItems.reduce((total, item) => total + item.quantity, 0);
+
     return (
         <header className="main-header">
             <div className="header-content">

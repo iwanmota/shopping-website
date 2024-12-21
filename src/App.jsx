@@ -3,13 +3,13 @@ import Header from './components/Header';
 import ProductList from './components/ProductList';
 import CartModal from './components/CartModal';
 import './styles/main.css';
+import { CartProvider } from './context/CartContext';
 
 const App = () => {
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [isCartOpen, setIsCartOpen] = useState(false);
-    const [cartItems, setCartItems] = useState([]);
 
     useEffect(() => {
         fetch('http://localhost:3001/api/products')
@@ -28,15 +28,16 @@ const App = () => {
     if (error) return <div>Error: {error}</div>;
 
     return (
-        <div className="App">
-            <Header onCartClick={() => setIsCartOpen(true)} cartItemCount={cartItems.length} />
-            <ProductList products={products} />
-            <CartModal 
-                isOpen={isCartOpen} 
-                onClose={() => setIsCartOpen(false)}
-                cartItems={cartItems}
-            />
-        </div>
+        <CartProvider>
+            <div className="App">
+                <Header onCartClick={() => setIsCartOpen(true)} />
+                <ProductList products={products} />
+                <CartModal 
+                    isOpen={isCartOpen} 
+                    onClose={() => setIsCartOpen(false)}
+                />
+            </div>
+        </CartProvider>
     );
 };
 
