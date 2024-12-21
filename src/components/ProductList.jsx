@@ -3,11 +3,15 @@ import PropTypes from 'prop-types';
 import ProductCard from './ProductCard';
 import './ProductList.css';
 
-const ProductList = ({ products }) => {
+const ProductList = ({ products, onImageClick }) => {
     return (
         <div className="product-list">
             {products.map(product => (
-                <ProductCard key={product.id} product={product} />
+                <ProductCard 
+                    key={product.id} 
+                    product={product} 
+                    onImageClick={onImageClick}
+                />
             ))}
         </div>
     );
@@ -23,6 +27,7 @@ ProductList.propTypes = {
             description: PropTypes.string.isRequired,
         })
     ).isRequired,
+    onImageClick: PropTypes.func.isRequired,
 };
 
 export default ProductList;

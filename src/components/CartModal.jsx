@@ -31,6 +31,9 @@ const CartModal = ({ isOpen, onClose }) => {
                         <ul>
                             {cartItems.map(item => (
                                 <li key={item.id} className="cart-item">
+                                    <div className="item-image">
+                                        <img src={item.image} alt={item.name} />
+                                    </div>
                                     <div className="item-info">
                                         <h3>{item.name}</h3>
                                         <p className="price">${(item.price * item.quantity).toFixed(2)}</p>

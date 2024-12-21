@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Header from './components/Header';
 import ProductList from './components/ProductList';
 import CartModal from './components/CartModal';
+import ImageModal from './components/ImageModal';
 import './styles/main.css';
 import { CartProvider } from './context/CartContext';
 
@@ -10,6 +11,7 @@ const App = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [isCartOpen, setIsCartOpen] = useState(false);
+    const [imageModal, setImageModal] = useState({ isOpen: false, image: '', alt: '' });
 
     useEffect(() => {
         fetch('http://localhost:3001/api/products')
@@ -24,6 +26,10 @@ const App = () => {
             });
     }, []);
 
+    const handleImageClick = (image, alt) => {
+        setImageModal({ isOpen: true, image, alt });
+    };
+
     if (loading) return <div>Loading...</div>;
     if (error) return <div>Error: {error}</div>;
 
@@ -31,10 +37,16 @@ const App = () => {
         <CartProvider>
             <div className="App">
                 <Header onCartClick={() => setIsCartOpen(true)} />
-                <ProductList products={products} />
+                <ProductList products={products} onImageClick={handleImageClick} />
                 <CartModal 
                     isOpen={isCartOpen} 
                     onClose={() => setIsCartOpen(false)}
+                />
+                <ImageModal 
+                    isOpen={imageModal.isOpen}
+                    image={imageModal.image}
+                    alt={imageModal.alt}
+                    onClose={() => setImageModal({ isOpen: false, image: '', alt: '' })}
                 />
             </div>
         </CartProvider>

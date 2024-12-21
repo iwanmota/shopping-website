@@ -2,12 +2,17 @@ import React from 'react';
 import { useCart } from '../context/CartContext';
 import './ProductCard.css';
 
-const ProductCard = ({ product }) => {
+const ProductCard = ({ product, onImageClick }) => {
     const { addToCart } = useCart();
 
     return (
         <div className="product-card">
-            <img src={product.image} alt={product.name} className="product-image" />
+            <img 
+                src={product.image} 
+                alt={product.name} 
+                className="product-image"
+                onClick={() => onImageClick(product.image, product.name)}
+            />
             <h2 className="product-name">{product.name}</h2>
             <p className="product-price">${product.price}</p>
             <p className="product-description">{product.description}</p>
