@@ -1,10 +1,12 @@
 import React from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import './Header.css';
 
 const Header = ({ onCartClick }) => {
     const { cartItems } = useCart();
     const cartItemCount = cartItems.reduce((total, item) => total + item.quantity, 0);
+    const location = useLocation();
 
     return (
         <header className="main-header">
@@ -14,10 +16,21 @@ const Header = ({ onCartClick }) => {
                 </div>
                 <nav className="main-nav">
                     <ul>
-                        <li><a href="/" className="active">Home</a></li>
-                        <li><a href="/products">Products</a></li>
-                        <li><a href="/deals">Deals</a></li>
-                        <li><a href="/about">About</a></li>
+                        <li>
+                            <Link to="/" className={location.pathname === '/' ? 'active' : ''}>
+                                Home
+                            </Link>
+                        </li>
+                        <li>
+                            <Link to="/products" className={location.pathname === '/products' ? 'active' : ''}>
+                                Products
+                            </Link>
+                        </li>
+                        <li>
+                            <Link to="/about" className={location.pathname === '/about' ? 'active' : ''}>
+                                About
+                            </Link>
+                        </li>
                     </ul>
                 </nav>
                 <div className="header-actions">

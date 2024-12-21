@@ -8,15 +8,19 @@
     display: flex;
     justify-content: flex-end;
     z-index: 1000;
+    backdrop-filter: blur(8px);
+    background: rgba(0, 0, 0, 0.4);
 }
 
 .modal-content {
-    background: white;
+    background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%);
     width: 400px;
     height: 100%;
     animation: slideIn 0.3s ease-out;
     display: flex;
     flex-direction: column;
+    border-radius: 20px 0 0 20px;
+    box-shadow: -10px 0 30px rgba(0, 0, 0, 0.1);
 }
 
 @keyframes slideIn {
@@ -73,6 +77,11 @@
     align-items: center;
     padding: 15px 0;
     border-bottom: 1px solid #eee;
+    background: white;
+    border-radius: 12px;
+    padding: 1rem;
+    margin: 0.5rem 0;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
 .item-image img {
@@ -106,10 +115,19 @@
 
 .quantity-controls button {
     background: #f8f9fa;
-    border: 1px solid #dee2e6;
-    border-radius: 4px;
-    padding: 4px 8px;
-    cursor: pointer;
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.quantity-controls button:hover {
+    background: #e9ecef;
+    border-color: #dee2e6;
 }
 
 .quantity-controls span {
@@ -153,17 +171,20 @@
 .checkout-button {
     width: 100%;
     padding: 15px;
-    background: #2ecc71;
+    background: linear-gradient(135deg, #2ecc71, #27ae60);
     color: white;
     border: none;
-    border-radius: 5px;
+    border-radius: 12px;
     font-size: 1.1rem;
     cursor: pointer;
-    transition: background 0.3s;
+    transition: all 0.3s ease;
+    font-weight: 600;
+    letter-spacing: 0.5px;
 }
 
-.checkout-button:hover {
-    background: #27ae60;
+.checkout-button:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(46, 204, 113, 0.3);
 }
 
 .checkout-button:disabled {
