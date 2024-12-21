@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import Header from './components/Header';
 import ProductList from './components/ProductList';
-import Cart from './components/Cart';
+import CartModal from './components/CartModal';
 import './styles/main.css';
 
 const App = () => {
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [isCartOpen, setIsCartOpen] = useState(false);
+    const [cartItems, setCartItems] = useState([]);
 
     useEffect(() => {
         fetch('http://localhost:3001/api/products')
@@ -27,9 +29,13 @@ const App = () => {
 
     return (
         <div className="App">
-            <Header />
+            <Header onCartClick={() => setIsCartOpen(true)} cartItemCount={cartItems.length} />
             <ProductList products={products} />
-            <Cart />
+            <CartModal 
+                isOpen={isCartOpen} 
+                onClose={() => setIsCartOpen(false)}
+                cartItems={cartItems}
+            />
         </div>
     );
 };
