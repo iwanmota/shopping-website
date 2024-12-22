@@ -6,6 +6,7 @@ import ProductList from './components/ProductList';
 import About from './components/About';
 import CartModal from './components/CartModal';
 import ImageModal from './components/ImageModal';
+import Toast from './components/Toast';
 import './styles/main.css';
 import { CartProvider } from './context/CartContext';
 
@@ -15,6 +16,7 @@ const App = () => {
     const [error, setError] = useState(null);
     const [isCartOpen, setIsCartOpen] = useState(false);
     const [imageModal, setImageModal] = useState({ isOpen: false, image: '', alt: '' });
+    const [toast, setToast] = useState({ visible: false, message: '' });
 
     useEffect(() => {
         fetch('http://localhost:3001/api/products')
@@ -29,6 +31,14 @@ const App = () => {
             });
     }, []);
 
+    const showToast = (message) => {
+        setToast({ visible: true, message });
+    };
+
+    const hideToast = () => {
+        setToast({ visible: false, message: '' });
+    };
+
     const handleImageClick = (image, alt) => {
         setImageModal({ isOpen: true, image, alt });
     };
@@ -42,9 +52,11 @@ const App = () => {
                 <div className="App">
                     <Header onCartClick={() => setIsCartOpen(true)} />
                     <Routes>
-                        <Route path="/" element={<Homepage />} />
+                        <Route path="/" element={
+                            <Homepage showToast={showToast} />
+                        } />
                         <Route path="/products" element={
-                            <ProductList products={products} onImageClick={handleImageClick} />
+                            <ProductList products={products} onImageClick={handleImageClick} showToast={showToast} />
                         } />
                         <Route path="/about" element={<About />} />
                     </Routes>
@@ -57,6 +69,11 @@ const App = () => {
                         image={imageModal.image}
                         alt={imageModal.alt}
                         onClose={() => setImageModal({ isOpen: false, image: '', alt: '' })}
+                    />
+                    <Toast 
+                        message={toast.message}
+                        isVisible={toast.visible}
+                        onHide={hideToast}
                     />
                 </div>
             </CartProvider>

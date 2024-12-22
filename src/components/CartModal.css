@@ -190,4 +190,60 @@
 .checkout-button:disabled {
     background: #bdc3c7;
     cursor: not-allowed;
+}
+
+.price-details {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    color: #2c3e50;
+    font-size: 0.9rem;
+}
+
+.unit-price {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.sale-label {
+    background: #e74c3c;
+    color: white;
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.quantity-price {
+    color: #7f8c8d;
+}
+
+.cart-summary {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.cart-total {
+    display: flex;
+    justify-content: space-between;
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #2c3e50;
+}
+
+.cart-savings {
+    text-align: right;
+}
+
+.savings-text {
+    color: #27ae60;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.quantity-controls button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
 } 

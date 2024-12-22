@@ -4,16 +4,52 @@ const CartContext = createContext();
 
 const cartReducer = (state, action) => {
     switch (action.type) {
-        case 'ADD_ITEM':
-            const existingItem = state.find(item => item.id === action.payload.id);
-            if (existingItem) {
-                return state.map(item =>
-                    item.id === action.payload.id
-                        ? { ...item, quantity: item.quantity + 1 }
-                        : item
-                );
+        case 'ADD_ITEM': {
+            const { id, price, salePrice, onSaleQuantity, isOnSale } = action.payload;
+            const existingSaleItem = state.find(item => item.id === id && item.isOnSale);
+            const existingRegularItem = state.find(item => item.id === id && !item.isOnSale);
+            
+            let updatedState = [...state];
+
+            if (isOnSale && onSaleQuantity > 0) {
+                // Handle sale item
+                if (existingSaleItem) {
+                    if (existingSaleItem.quantity < onSaleQuantity) {
+                        updatedState = state.map(item =>
+                            item.id === id && item.isOnSale
+                                ? { ...item, quantity: item.quantity + 1 }
+                                : item
+                        );
+                    } else {
+                        // Add as regular item if sale quantity is exceeded
+                        if (existingRegularItem) {
+                            updatedState = state.map(item =>
+                                item.id === id && !item.isOnSale
+                                    ? { ...item, quantity: item.quantity + 1 }
+                                    : item
+                            );
+                        } else {
+                            updatedState.push({ ...action.payload, isOnSale: false, price, quantity: 1 });
+                        }
+                    }
+                } else {
+                    updatedState.push({ ...action.payload, price: salePrice, isOnSale: true, quantity: 1 });
+                }
+            } else {
+                // Handle regular item
+                if (existingRegularItem) {
+                    updatedState = state.map(item =>
+                        item.id === id && !item.isOnSale
+                            ? { ...item, quantity: item.quantity + 1 }
+                            : item
+                    );
+                } else {
+                    updatedState.push({ ...action.payload, isOnSale: false, quantity: 1 });
+                }
             }
-            return [...state, { ...action.payload, quantity: 1 }];
+
+            return updatedState;
+        }
 
         case 'REMOVE_ITEM':
             return state.filter(item => item.id !== action.payload);

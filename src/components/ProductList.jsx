@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import ProductCard from './ProductCard';
 import './ProductList.css';
 
-const ProductList = ({ products, onImageClick }) => {
+const ProductList = ({ products, onImageClick, showToast }) => {
     return (
         <div className="product-list">
             {products.map(product => (
@@ -11,6 +11,7 @@ const ProductList = ({ products, onImageClick }) => {
                     key={product.id} 
                     product={product} 
                     onImageClick={onImageClick}
+                    showToast={showToast}
                 />
             ))}
         </div>
@@ -28,6 +29,7 @@ ProductList.propTypes = {
         })
     ).isRequired,
     onImageClick: PropTypes.func.isRequired,
+    showToast: PropTypes.func.isRequired,
 };
 
 export default ProductList;

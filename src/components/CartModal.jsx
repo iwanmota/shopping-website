@@ -7,6 +7,8 @@ const CartModal = ({ isOpen, onClose }) => {
 
     if (!isOpen) return null;
 
+    const formatPrice = (price) => price.toFixed(2);
+
     return (
         <div className="modal-overlay" onClick={onClose}>
             <div className="modal-content" onClick={e => e.stopPropagation()}>
@@ -30,18 +32,27 @@ const CartModal = ({ isOpen, onClose }) => {
                     ) : (
                         <ul>
                             {cartItems.map(item => (
-                                <li key={item.id} className="cart-item">
+                                <li key={`${item.id}-${item.isOnSale ? 'sale' : 'regular'}`} className="cart-item">
                                     <div className="item-image">
                                         <img src={item.image} alt={item.name} />
                                     </div>
                                     <div className="item-info">
                                         <h3>{item.name}</h3>
-                                        <p className="price">${(item.price * item.quantity).toFixed(2)}</p>
+                                        <div className="price-details">
+                                            <span className="unit-price">
+                                                ${formatPrice(item.price)} 
+                                                {item.isOnSale && <span className="sale-label">Sale Price</span>}
+                                            </span>
+                                            <span className="quantity-price">
+                                                × {item.quantity} = ${formatPrice(item.price * item.quantity)}
+                                            </span>
+                                        </div>
                                     </div>
                                     <div className="item-actions">
                                         <div className="quantity-controls">
                                             <button 
                                                 onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                                                disabled={item.quantity <= 1}
                                             >
                                                 -
                                             </button>
@@ -65,15 +76,26 @@ const CartModal = ({ isOpen, onClose }) => {
                     )}
                 </div>
 
-                <div className="modal-footer">
-                    <div className="cart-total">
-                        <span>Total:</span>
-                        <span>${cartTotal.toFixed(2)}</span>
+                {cartItems.length > 0 && (
+                    <div className="modal-footer">
+                        <div className="cart-summary">
+                            <div className="cart-total">
+                                <span>Total:</span>
+                                <span>${formatPrice(cartTotal)}</span>
+                            </div>
+                            <div className="cart-savings">
+                                {cartItems.some(item => item.isOnSale) && (
+                                    <span className="savings-text">
+                                        Includes sale price savings!
+                                    </span>
+                                )}
+                            </div>
+                        </div>
+                        <button className="checkout-button">
+                            Proceed to Checkout
+                        </button>
                     </div>
-                    <button className="checkout-button" disabled={cartItems.length === 0}>
-                        Proceed to Checkout
-                    </button>
-                </div>
+                )}
             </div>
         </div>
     );
