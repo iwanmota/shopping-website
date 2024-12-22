@@ -1,21 +1,20 @@
 .about-container {
     max-width: 1200px;
-    margin: 0 auto;
+    margin: 2rem auto;
     padding: 2rem;
-    background: rgba(255, 255, 255, 0.9);
-    border-radius: 20px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
-    backdrop-filter: blur(10px);
-    margin-top: 2rem;
 }
 
 .about-header {
     text-align: center;
     margin-bottom: 3rem;
+    background: linear-gradient(135deg, var(--maple-red), var(--brick-red));
+    padding: 3rem 2rem;
+    border-radius: 20px;
+    color: var(--primary-white);
+    box-shadow: 0 10px 30px rgba(124, 37, 41, 0.2);
 }
 
 .about-header h1 {
-    color: #2c3e50;
     font-size: 2.5rem;
     margin-bottom: 1rem;
 }
@@ -23,7 +22,7 @@
 .decorative-line {
     width: 100px;
     height: 4px;
-    background: linear-gradient(135deg, #3498db, #2980b9);
+    background: var(--primary-white);
     margin: 0 auto;
     border-radius: 2px;
 }
@@ -39,14 +38,14 @@
     position: relative;
     border-radius: 20px;
     overflow: hidden;
-    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 10px 30px rgba(124, 37, 41, 0.1);
+    border: 1px solid rgba(124, 37, 41, 0.1);
 }
 
-.main-image {
+.about-image img {
     width: 100%;
     height: auto;
     display: block;
-    transition: transform 0.3s ease;
 }
 
 .image-overlay {
@@ -54,21 +53,28 @@
     bottom: 0;
     left: 0;
     right: 0;
-    padding: 1rem;
-    background: linear-gradient(to top, rgba(0,0,0,0.7), transparent);
-    color: white;
-    font-size: 1.2rem;
-    font-weight: 500;
+    padding: 2rem;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
+    color: var(--primary-white);
+    text-align: center;
+}
+
+.about-text {
+    background: var(--primary-white);
+    padding: 2rem;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(124, 37, 41, 0.1);
+    border: 1px solid rgba(124, 37, 41, 0.1);
 }
 
 .about-text h2 {
-    color: #2c3e50;
-    font-size: 2rem;
+    color: var(--maple-red);
     margin-bottom: 1.5rem;
+    font-size: 2rem;
 }
 
 .about-text p {
-    color: #7f8c8d;
+    color: var(--text-dark);
     line-height: 1.8;
     margin-bottom: 2rem;
 }
@@ -81,58 +87,62 @@
 }
 
 .value-card {
-    padding: 1.5rem;
-    background: white;
+    background: var(--off-white);
+    padding: 2rem;
     border-radius: 15px;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
-    transition: transform 0.3s ease;
+    text-align: center;
+    transition: all 0.3s ease;
+    border: 1px solid rgba(124, 37, 41, 0.1);
 }
 
 .value-card:hover {
     transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(124, 37, 41, 0.1);
 }
 
 .value-card i {
     font-size: 2rem;
-    color: #3498db;
+    color: var(--maple-red);
     margin-bottom: 1rem;
 }
 
 .value-card h3 {
-    color: #2c3e50;
-    margin-bottom: 0.5rem;
+    color: var(--text-dark);
+    margin-bottom: 1rem;
 }
 
 .value-card p {
-    color: #7f8c8d;
+    color: var(--text-dark);
     font-size: 0.9rem;
     margin: 0;
 }
 
 .about-cta {
-    margin-top: 3rem;
+    background: linear-gradient(135deg, var(--off-white) 0%, #e8ecf1 100%);
     padding: 2rem;
-    background: linear-gradient(135deg, #f5f7fa 0%, #e8ecf1 100%);
     border-radius: 15px;
+    margin-top: 3rem;
 }
 
 .learn-more-btn {
-    background: linear-gradient(135deg, #3498db, #2980b9);
-    color: white;
+    background: linear-gradient(135deg, var(--maple-red), var(--brick-red));
+    color: var(--primary-white);
     border: none;
     padding: 1rem 2rem;
     border-radius: 12px;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.3s ease;
-    display: flex;
+    display: inline-flex;
     align-items: center;
     gap: 0.5rem;
+    margin-top: 1.5rem;
 }
 
 .learn-more-btn:hover {
+    background: linear-gradient(135deg, var(--brick-red), var(--autumn-red));
     transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
+    box-shadow: 0 5px 15px rgba(124, 37, 41, 0.2);
 }
 
 @media (max-width: 768px) {
@@ -142,5 +152,9 @@
 
     .values-grid {
         grid-template-columns: 1fr;
+    }
+
+    .about-container {
+        padding: 1rem;
     }
 } 

@@ -45,20 +45,29 @@
 }
 
 .add-to-cart-button {
-    background: linear-gradient(135deg, #3498db, #2980b9);
-    color: white;
+    width: 100%;
+    background: linear-gradient(135deg, var(--maple-red), var(--brick-red));
+    color: var(--primary-white);
     border: none;
     padding: 1rem;
     border-radius: 12px;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.3s ease;
-    margin-top: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
 }
 
 .add-to-cart-button:hover {
-    background: linear-gradient(135deg, #2980b9, #2573a7);
-    transform: scale(1.02);
+    background: linear-gradient(135deg, var(--brick-red), var(--autumn-red));
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(124, 37, 41, 0.2);
+}
+
+.add-to-cart-button i {
+    font-size: 0.9rem;
 }
 
 .sale-badge {

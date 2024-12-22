@@ -34,9 +34,6 @@ const Header = ({ onCartClick }) => {
                     </ul>
                 </nav>
                 <div className="header-actions">
-                    <button className="search-btn">
-                        <i className="fas fa-search"></i>
-                    </button>
                     <button className="cart-btn" onClick={onCartClick}>
                         <i className="fas fa-shopping-cart"></i>
                         {cartItemCount > 0 && <span className="cart-count">{cartItemCount}</span>}
