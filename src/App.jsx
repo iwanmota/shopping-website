@@ -13,11 +13,14 @@ import Header from './components/Header';
 import Homepage from './components/Homepage';
 import ProductList from './components/ProductList';
 import About from './components/About';
+import AuthPage from './components/AuthPage';
 import CartModal from './components/CartModal';
 import ImageModal from './components/ImageModal';
 import Toast from './components/Toast';
+import ProtectedRoute, { AdminRoute } from './components/ProtectedRoute';
 import './styles/main.css';
 import { CartProvider } from './context/CartContext';
+import { AuthProvider } from './context/AuthContext';
 
 const App = () => {
     // State for product data and loading status
@@ -83,43 +86,68 @@ const App = () => {
 
     return (
         <Router>
-            <CartProvider>
-                <div className="App">
-                    <Header onCartClick={() => setIsCartOpen(true)} />
-                    <Routes>
-                        <Route path="/" element={
-                            <Homepage showToast={showToast} />
-                        } />
-                        <Route path="/products" element={
-                            <ProductList 
-                                products={products} 
-                                onImageClick={handleImageClick} 
-                                showToast={showToast} 
-                            />
-                        } />
-                        <Route path="/about" element={<About />} />
-                    </Routes>
-                    
-                    {/* Modals */}
-                    <CartModal 
-                        isOpen={isCartOpen} 
-                        onClose={() => setIsCartOpen(false)}
-                    />
-                    <ImageModal 
-                        isOpen={imageModal.isOpen}
-                        image={imageModal.image}
-                        alt={imageModal.alt}
-                        onClose={() => setImageModal({ isOpen: false, image: '', alt: '' })}
-                    />
-                    
-                    {/* Toast notifications */}
-                    <Toast 
-                        message={toast.message}
-                        isVisible={toast.visible}
-                        onHide={hideToast}
-                    />
-                </div>
-            </CartProvider>
+            <AuthProvider>
+                <CartProvider>
+                    <div className="App">
+                        <Header onCartClick={() => setIsCartOpen(true)} />
+                        <Routes>
+                            <Route path="/" element={
+                                <Homepage showToast={showToast} />
+                            } />
+                            <Route path="/products" element={
+                                <ProductList 
+                                    products={products} 
+                                    onImageClick={handleImageClick} 
+                                    showToast={showToast} 
+                                />
+                            } />
+                            <Route path="/about" element={<About />} />
+                            <Route path="/login" element={<AuthPage />} />
+                            <Route path="/admin" element={
+                                <AdminRoute>
+                                    <div className="admin-page">
+                                        <h1>Admin Dashboard</h1>
+                                        <p>This is a protected admin page. Only users with admin role can access it.</p>
+                                    </div>
+                                </AdminRoute>
+                            } />
+                            <Route path="/profile" element={
+                                <ProtectedRoute>
+                                    <div className="profile-page">
+                                        <h1>User Profile</h1>
+                                        <p>This is a protected page. Only authenticated users can access it.</p>
+                                    </div>
+                                </ProtectedRoute>
+                            } />
+                            <Route path="/unauthorized" element={
+                                <div className="unauthorized-page">
+                                    <h1>Unauthorized</h1>
+                                    <p>You don't have permission to access this page.</p>
+                                </div>
+                            } />
+                        </Routes>
+                        
+                        {/* Modals */}
+                        <CartModal 
+                            isOpen={isCartOpen} 
+                            onClose={() => setIsCartOpen(false)}
+                        />
+                        <ImageModal 
+                            isOpen={imageModal.isOpen}
+                            image={imageModal.image}
+                            alt={imageModal.alt}
+                            onClose={() => setImageModal({ isOpen: false, image: '', alt: '' })}
+                        />
+                        
+                        {/* Toast notifications */}
+                        <Toast 
+                            message={toast.message}
+                            isVisible={toast.visible}
+                            onHide={hideToast}
+                        />
+                    </div>
+                </CartProvider>
+            </AuthProvider>
         </Router>
     );
 };

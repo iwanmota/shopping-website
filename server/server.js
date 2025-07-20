@@ -11,6 +11,10 @@
 const express = require('express');
 const sqlite3 = require('sqlite3').verbose(); // Use verbose mode for more detailed error messages
 const cors = require('cors');
+const { authErrorHandler } = require('./middleware/auth');
+
+// Import routes
+const authRoutes = require('./routes/auth');
 
 // Initialize Express application
 const app = express();
@@ -125,6 +129,12 @@ app.post('/api/products/purchase', (req, res) => {
         res.json({ message: 'Purchase successful' });
     }
 });
+
+// Register authentication routes
+app.use('/api/auth', authRoutes);
+
+// Register authentication error handler
+app.use(authErrorHandler);
 
 // Set up server port and start listening
 const PORT = process.env.PORT || 3001;

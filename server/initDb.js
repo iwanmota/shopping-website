@@ -10,6 +10,8 @@
 
 // Import SQLite with verbose mode for detailed error information
 const sqlite3 = require('sqlite3').verbose();
+// Import bcrypt for password hashing
+const bcrypt = require('bcrypt');
 
 // Connect to the database (creates it if it doesn't exist)
 const db = new sqlite3.Database('./shopping.db');
@@ -21,6 +23,32 @@ const db = new sqlite3.Database('./shopping.db');
  * which is important for table creation and initial data population.
  */
 db.serialize(() => {
+    /**
+     * Create users table if it doesn't exist
+     * 
+     * Schema:
+     * - id: Unique identifier for each user
+     * - email: User's email address (required, unique)
+     * - password: Hashed password using bcrypt (required)
+     * - firstName: User's first name
+     * - lastName: User's last name
+     * - role: User's role (customer or admin, defaults to customer)
+     * - createdAt: Timestamp when the user was created
+     * - updatedAt: Timestamp when the user was last updated
+     */
+    db.run(`
+        CREATE TABLE IF NOT EXISTS users (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            email TEXT NOT NULL UNIQUE,
+            password TEXT NOT NULL,
+            firstName TEXT,
+            lastName TEXT,
+            role TEXT NOT NULL DEFAULT 'customer',
+            createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    `);
+
     /**
      * Create products table if it doesn't exist
      * 
@@ -75,7 +103,65 @@ db.serialize(() => {
         insert.run(product);
     });
     insert.finalize();
+
+    /**
+     * Create sample users for testing
+     * 
+     * Creating an admin user and a regular customer user with hashed passwords.
+     * The password hashing is done synchronously for simplicity in this initialization script.
+     */
+    const saltRounds = 10;
+    const adminPassword = bcrypt.hashSync('admin123', saltRounds);
+    const customerPassword = bcrypt.hashSync('customer123', saltRounds);
+
+    // Check if users already exist to avoid duplicates
+    db.get('SELECT COUNT(*) as count FROM users WHERE email = ?', ['admin@shopsmart.com'], (err, row) => {
+        if (err) {
+            console.error('Error checking for existing admin user:', err);
+            return;
+        }
+        
+        // Only insert if user doesn't exist
+        if (row.count === 0) {
+            db.run(
+                'INSERT INTO users (email, password, firstName, lastName, role) VALUES (?, ?, ?, ?, ?)',
+                ['admin@shopsmart.com', adminPassword, 'Admin', 'User', 'admin'],
+                (err) => {
+                    if (err) {
+                        console.error('Error creating admin user:', err);
+                    } else {
+                        console.log('Admin user created successfully');
+                    }
+                }
+            );
+        }
+    });
+
+    db.get('SELECT COUNT(*) as count FROM users WHERE email = ?', ['customer@example.com'], (err, row) => {
+        if (err) {
+            console.error('Error checking for existing customer user:', err);
+            return;
+        }
+        
+        // Only insert if user doesn't exist
+        if (row.count === 0) {
+            db.run(
+                'INSERT INTO users (email, password, firstName, lastName, role) VALUES (?, ?, ?, ?, ?)',
+                ['customer@example.com', customerPassword, 'John', 'Doe', 'customer'],
+                (err) => {
+                    if (err) {
+                        console.error('Error creating customer user:', err);
+                    } else {
+                        console.log('Customer user created successfully');
+                    }
+                }
+            );
+        }
+    });
 });
 
 // Close the database connection when initialization is complete
-db.close(); 
+setTimeout(() => {
+    db.close();
+    console.log('Database initialization complete');
+}, 1000); // Small delay to ensure async operations complete
