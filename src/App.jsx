@@ -1,3 +1,12 @@
+/**
+ * Main Application Component
+ * 
+ * This is the root component of the ShopSmart e-commerce application.
+ * It handles routing, global state management, and renders the main layout.
+ * 
+ * The component fetches product data on mount and manages UI state for modals
+ * and notifications.
+ */
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Header from './components/Header';
@@ -11,13 +20,22 @@ import './styles/main.css';
 import { CartProvider } from './context/CartContext';
 
 const App = () => {
+    // State for product data and loading status
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    
+    // UI state for modals and notifications
     const [isCartOpen, setIsCartOpen] = useState(false);
     const [imageModal, setImageModal] = useState({ isOpen: false, image: '', alt: '' });
     const [toast, setToast] = useState({ visible: false, message: '' });
 
+    /**
+     * Fetch all products from the API on component mount
+     * 
+     * This effect runs once when the component mounts and populates
+     * the products state with data from the backend API.
+     */
     useEffect(() => {
         fetch('http://localhost:3001/api/products')
             .then(response => response.json())
@@ -31,19 +49,36 @@ const App = () => {
             });
     }, []);
 
+    /**
+     * Display a toast notification with the specified message
+     * 
+     * @param {string} message - The message to display in the toast
+     */
     const showToast = (message) => {
         setToast({ visible: true, message });
     };
 
+    /**
+     * Hide the currently displayed toast notification
+     */
     const hideToast = () => {
         setToast({ visible: false, message: '' });
     };
 
+    /**
+     * Handle product image click to show the image modal
+     * 
+     * @param {string} image - URL of the image to display
+     * @param {string} alt - Alt text for the image
+     */
     const handleImageClick = (image, alt) => {
         setImageModal({ isOpen: true, image, alt });
     };
 
+    // Show loading indicator while fetching products
     if (loading) return <div className="loading">Loading</div>;
+    
+    // Show error message if product fetch failed
     if (error) return <div className="error">Error: {error}</div>;
 
     return (
@@ -56,10 +91,16 @@ const App = () => {
                             <Homepage showToast={showToast} />
                         } />
                         <Route path="/products" element={
-                            <ProductList products={products} onImageClick={handleImageClick} showToast={showToast} />
+                            <ProductList 
+                                products={products} 
+                                onImageClick={handleImageClick} 
+                                showToast={showToast} 
+                            />
                         } />
                         <Route path="/about" element={<About />} />
                     </Routes>
+                    
+                    {/* Modals */}
                     <CartModal 
                         isOpen={isCartOpen} 
                         onClose={() => setIsCartOpen(false)}
@@ -70,6 +111,8 @@ const App = () => {
                         alt={imageModal.alt}
                         onClose={() => setImageModal({ isOpen: false, image: '', alt: '' })}
                     />
+                    
+                    {/* Toast notifications */}
                     <Toast 
                         message={toast.message}
                         isVisible={toast.visible}

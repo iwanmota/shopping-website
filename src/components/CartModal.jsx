@@ -1,12 +1,36 @@
+/**
+ * Shopping Cart Modal Component
+ * 
+ * Displays the current cart contents in a modal overlay.
+ * Allows users to view items, adjust quantities, remove items, and proceed to checkout.
+ * 
+ * @component
+ */
 import React from 'react';
 import { useCart } from '../context/CartContext';
 import './CartModal.css';
 
+/**
+ * CartModal component for displaying and managing cart contents
+ * 
+ * @param {Object} props - Component props
+ * @param {boolean} props.isOpen - Whether the modal is currently visible
+ * @param {Function} props.onClose - Handler function to close the modal
+ * @returns {React.ReactElement|null} Cart modal component or null when closed
+ */
 const CartModal = ({ isOpen, onClose }) => {
+    // Get cart state and functions from context
     const { cartItems, removeFromCart, updateQuantity, clearCart, cartTotal } = useCart();
 
+    // Don't render anything if modal is closed
     if (!isOpen) return null;
 
+    /**
+     * Format price to display with 2 decimal places
+     * 
+     * @param {number} price - Price to format
+     * @returns {string} Formatted price with 2 decimal places
+     */
     const formatPrice = (price) => price.toFixed(2);
 
     return (
@@ -49,6 +73,7 @@ const CartModal = ({ isOpen, onClose }) => {
                                         </div>
                                     </div>
                                     <div className="item-actions">
+                                        {/* Quantity adjustment controls */}
                                         <div className="quantity-controls">
                                             <button 
                                                 onClick={() => updateQuantity(item.id, item.quantity - 1)}
@@ -63,6 +88,7 @@ const CartModal = ({ isOpen, onClose }) => {
                                                 +
                                             </button>
                                         </div>
+                                        {/* Remove item button */}
                                         <button 
                                             className="remove-button"
                                             onClick={() => removeFromCart(item.id)}
@@ -76,6 +102,7 @@ const CartModal = ({ isOpen, onClose }) => {
                     )}
                 </div>
 
+                {/* Cart summary and checkout section - only shown when cart has items */}
                 {cartItems.length > 0 && (
                     <div className="modal-footer">
                         <div className="cart-summary">
