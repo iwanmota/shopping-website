@@ -14,6 +14,7 @@ import Homepage from './components/Homepage';
 import ProductList from './components/ProductList';
 import About from './components/About';
 import AuthPage from './components/AuthPage';
+import NotFound from './components/NotFound';
 import CartModal from './components/CartModal';
 import ImageModal from './components/ImageModal';
 import Toast from './components/Toast';
@@ -125,6 +126,8 @@ const App = () => {
                                     <p>You don't have permission to access this page.</p>
                                 </div>
                             } />
+                            {/* Catch-all route for 404 Not Found */}
+                            <Route path="*" element={<NotFound />} />
                         </Routes>
                         
                         {/* Modals */}

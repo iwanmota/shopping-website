@@ -11,10 +11,15 @@
 const express = require('express');
 const sqlite3 = require('sqlite3').verbose(); // Use verbose mode for more detailed error messages
 const cors = require('cors');
+const path = require('path');
 const { authErrorHandler } = require('./middleware/auth');
 
 // Import routes
 const authRoutes = require('./routes/auth');
+const adminRoutes = require('./routes/admin');
+
+// Import file storage initialization
+const initFileStorage = require('./utils/initFileStorage');
 
 // Initialize Express application
 const app = express();
@@ -22,6 +27,7 @@ const app = express();
 // Apply middleware
 app.use(cors()); // Enable CORS for all routes to allow frontend access
 app.use(express.json()); // Parse JSON request bodies
+app.use(express.static(path.join(__dirname, '../public'))); // Serve static files from public directory
 
 // Connect to SQLite database
 const db = new sqlite3.Database('./shopping.db');
@@ -133,11 +139,24 @@ app.post('/api/products/purchase', (req, res) => {
 // Register authentication routes
 app.use('/api/auth', authRoutes);
 
+// Register admin routes
+app.use('/api/admin', adminRoutes);
+
 // Register authentication error handler
 app.use(authErrorHandler);
 
 // Set up server port and start listening
 const PORT = process.env.PORT || 3001;
-app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-});
+
+// Initialize file storage before starting the server
+(async () => {
+    try {
+        await initFileStorage();
+        app.listen(PORT, () => {
+            console.log(`Server running on port ${PORT}`);
+        });
+    } catch (error) {
+        console.error('Failed to initialize server:', error);
+        process.exit(1);
+    }
+})();

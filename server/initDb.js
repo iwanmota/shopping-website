@@ -61,6 +61,10 @@ db.serialize(() => {
      * - isOnSale: Boolean flag indicating if product is on sale (0=false, 1=true)
      * - salePrice: Discounted price when product is on sale
      * - onSaleQuantity: Number of items available at sale price
+     * - regularInventory: Number of items available at regular price
+     * - lowStockThreshold: Threshold for low stock warning
+     * - createdAt: Timestamp when the product was created
+     * - updatedAt: Timestamp when the product was last updated
      */
     db.run(`
         CREATE TABLE IF NOT EXISTS products (
@@ -71,7 +75,11 @@ db.serialize(() => {
             image TEXT,
             isOnSale BOOLEAN DEFAULT 0,
             salePrice REAL,
-            onSaleQuantity INTEGER DEFAULT 0
+            onSaleQuantity INTEGER DEFAULT 0,
+            regularInventory INTEGER DEFAULT 0,
+            lowStockThreshold INTEGER DEFAULT 5,
+            createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     `);
 
