@@ -577,11 +577,14 @@ router.post('/products/:id/image', (req, res) => {
         // Store old image path for cleanup
         const oldImagePath = product.image;
         
+        // Use the replaceProductImage function for proper image replacement handling
+        const { replaceProductImage } = require('../utils/fileStorage');
+        
         // Update product with new image path
         const updateSql = 'UPDATE products SET image = ?, updatedAt = ? WHERE id = ?';
         const updateParams = [imageInfo.relativePath, new Date().toISOString(), productId];
         
-        db.run(updateSql, updateParams, function(updateErr) {
+        db.run(updateSql, updateParams, async function(updateErr) {
           if (updateErr) {
             // Clean up the uploaded file if database update failed
             cleanupFailedUpload(req.file.path);
@@ -591,26 +594,33 @@ router.post('/products/:id/image', (req, res) => {
             });
           }
           
-          // Clean up old image file if it exists using the utility function
+          // Handle image replacement with proper cleanup
+          let replacementResult = null;
           if (oldImagePath) {
             try {
-              const { deleteProductImage } = require('../utils/fileStorage');
-              deleteProductImage(oldImagePath).then(deletionResult => {
-                if (deletionResult.errors.length > 0) {
-                  console.error(`Error deleting old image files for product ${productId}:`, deletionResult.errors);
-                } else if (deletionResult.deletedFiles.length > 0) {
-                  console.log(`Successfully cleaned up old image files for product ${productId}:`, deletionResult.deletedFiles);
+              replacementResult = await replaceProductImage(oldImagePath, imageInfo.relativePath);
+              
+              // Log replacement results
+              if (replacementResult.errors.length > 0) {
+                console.error(`Image replacement errors for product ${productId}:`, replacementResult.errors);
+              }
+              
+              if (replacementResult.oldImageCleanup.attempted) {
+                if (replacementResult.oldImageCleanup.success && replacementResult.oldImageCleanup.deletedFiles.length > 0) {
+                  console.log(`Successfully replaced image for product ${productId}. Cleaned up files:`, replacementResult.oldImageCleanup.deletedFiles);
+                } else if (replacementResult.oldImageCleanup.errors.length > 0) {
+                  console.warn(`Image replacement completed for product ${productId}, but cleanup had issues:`, replacementResult.oldImageCleanup.errors);
                 }
-              }).catch(error => {
-                console.error('Error processing old image cleanup:', error);
-              });
+              }
+              
             } catch (error) {
-              console.error('Error processing old image cleanup:', error);
+              console.error(`Error during image replacement for product ${productId}:`, error);
+              // Don't fail the request if replacement cleanup has issues
             }
           }
           
-          // Return success response
-          res.json({
+          // Return success response with replacement details
+          const response = {
             message: 'Image uploaded successfully',
             productId,
             image: {
@@ -620,7 +630,18 @@ router.post('/products/:id/image', (req, res) => {
               path: imageInfo.relativePath,
               uploadedAt: imageInfo.uploadedAt
             }
-          });
+          };
+          
+          // Include replacement details if available
+          if (replacementResult) {
+            response.imageReplacement = {
+              oldImageCleanup: replacementResult.oldImageCleanup,
+              success: replacementResult.success,
+              errors: replacementResult.errors
+            };
+          }
+          
+          res.json(response);
         });
         
       } catch (error) {
@@ -628,6 +649,150 @@ router.post('/products/:id/image', (req, res) => {
         cleanupFailedUpload(req.file.path);
         res.status(500).json({ 
           error: 'Server error during image processing', 
+          details: error.message 
+        });
+      }
+    });
+  });
+});
+
+/**
+ * PUT /api/admin/products/:id/image
+ * 
+ * Replaces an existing product image with a new one
+ * This endpoint handles the complete image replacement workflow
+ * Only accessible by admin users
+ * 
+ * @param {number} id - Product ID in URL path
+ * @param {File} image - New image file in multipart form data
+ * 
+ * @returns {Object} Replacement result with image information and cleanup details
+ * @response {200} Image replaced successfully
+ * @response {400} Validation error or upload error
+ * @response {401} Not authenticated
+ * @response {403} Not authorized (not an admin)
+ * @response {404} Product not found
+ * @response {500} Server error
+ */
+router.put('/products/:id/image', (req, res) => {
+  const productId = req.params.id;
+  
+  // First check if product exists
+  db.get('SELECT * FROM products WHERE id = ?', [productId], (err, product) => {
+    if (err) {
+      return res.status(500).json({ error: 'Database error', details: err.message });
+    }
+    
+    if (!product) {
+      return res.status(404).json({ error: 'Product not found' });
+    }
+    
+    // Handle file upload
+    uploadSingleImage(req, res, async (uploadErr) => {
+      if (uploadErr) {
+        return handleUploadError(uploadErr, req, res, () => {
+          res.status(500).json({ error: 'Upload failed', details: uploadErr.message });
+        });
+      }
+      
+      // Check if file was uploaded
+      if (!req.file) {
+        return res.status(400).json({ error: 'No image file provided' });
+      }
+      
+      try {
+        // Process the uploaded image
+        const processingResult = await processUploadedImage(req.file);
+        
+        if (!processingResult.success) {
+          // Clean up the uploaded file if processing failed
+          cleanupFailedUpload(req.file.path);
+          return res.status(400).json({ 
+            error: 'Image processing failed', 
+            details: processingResult.error 
+          });
+        }
+        
+        const imageInfo = processingResult.file;
+        const oldImagePath = product.image;
+        
+        // Use the replaceProductImage function for proper image replacement handling
+        const { replaceProductImage } = require('../utils/fileStorage');
+        
+        // Update product with new image path
+        const updateSql = 'UPDATE products SET image = ?, updatedAt = ? WHERE id = ?';
+        const updateParams = [imageInfo.relativePath, new Date().toISOString(), productId];
+        
+        db.run(updateSql, updateParams, async function(updateErr) {
+          if (updateErr) {
+            // Clean up the uploaded file if database update failed
+            cleanupFailedUpload(req.file.path);
+            return res.status(500).json({ 
+              error: 'Error updating product image', 
+              details: updateErr.message 
+            });
+          }
+          
+          // Handle image replacement with proper cleanup
+          let replacementResult = null;
+          try {
+            replacementResult = await replaceProductImage(oldImagePath, imageInfo.relativePath);
+            
+            // Log replacement results
+            if (replacementResult.errors.length > 0) {
+              console.error(`Image replacement errors for product ${productId}:`, replacementResult.errors);
+            }
+            
+            if (replacementResult.oldImageCleanup.attempted) {
+              if (replacementResult.oldImageCleanup.success && replacementResult.oldImageCleanup.deletedFiles.length > 0) {
+                console.log(`Successfully replaced image for product ${productId}. Cleaned up files:`, replacementResult.oldImageCleanup.deletedFiles);
+              } else if (replacementResult.oldImageCleanup.errors.length > 0) {
+                console.warn(`Image replacement completed for product ${productId}, but cleanup had issues:`, replacementResult.oldImageCleanup.errors);
+              }
+            }
+            
+          } catch (error) {
+            console.error(`Error during image replacement for product ${productId}:`, error);
+            // Create a basic result object if replacement function fails
+            replacementResult = {
+              success: false,
+              newImagePath: imageInfo.relativePath,
+              oldImageCleanup: {
+                attempted: false,
+                success: false,
+                deletedFiles: [],
+                errors: [`Replacement function error: ${error.message}`]
+              },
+              errors: [error.message]
+            };
+          }
+          
+          // Return success response with replacement details
+          res.json({
+            message: 'Image replaced successfully',
+            productId,
+            image: {
+              filename: imageInfo.filename,
+              originalName: imageInfo.originalName,
+              size: imageInfo.size,
+              path: imageInfo.relativePath,
+              uploadedAt: imageInfo.uploadedAt
+            },
+            replacement: {
+              oldImagePath,
+              newImagePath: imageInfo.relativePath,
+              oldImageCleanup: replacementResult.oldImageCleanup,
+              success: replacementResult.success,
+              errors: replacementResult.errors
+            }
+          });
+        });
+        
+      } catch (error) {
+        // Clean up the uploaded file if an error occurred
+        cleanupFailedUpload(req.file.path);
+        res.status(500).json({ 
+          error: 'Server error during image replacement', 
           details: error.message 
         });
       }

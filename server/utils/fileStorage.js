@@ -201,6 +201,133 @@ const deleteMultipleProductImages = async (relativePaths) => {
     return overallResult;
 };
 
+/**
+ * Replaces a product image with a new one, ensuring proper cleanup of old files
+ * This function handles the complete image replacement workflow:
+ * 1. Validates the new image file
+ * 2. Stores the new image
+ * 3. Cleans up the old image files
+ * 4. Provides rollback capability if needed
+ * 
+ * @param {string} oldImagePath - Relative path of the current image to replace
+ * @param {string} newImagePath - Relative path of the new image
+ * @returns {Promise<{success: boolean, newImagePath: string, oldImageCleanup: Object, errors: string[]}>} Result of replacement operation
+ */
+const replaceProductImage = async (oldImagePath, newImagePath) => {
+    const result = {
+        success: true,
+        newImagePath,
+        oldImageCleanup: {
+            attempted: false,
+            success: false,
+            deletedFiles: [],
+            errors: []
+        },
+        errors: []
+    };
+
+    try {
+        // Validate that the new image exists
+        if (!newImagePath) {
+            result.errors.push('New image path is required');
+            result.success = false;
+            return result;
+        }
+
+        const newFilename = extractFilenameFromPath(newImagePath);
+        if (!newFilename) {
+            result.errors.push('Invalid new image path provided');
+            result.success = false;
+            return result;
+        }
+
+        const newImageAbsolutePath = getAbsoluteImagePath(newFilename);
+        if (!fs.existsSync(newImageAbsolutePath)) {
+            result.errors.push('New image file does not exist');
+            result.success = false;
+            return result;
+        }
+
+        // If there's an old image, clean it up
+        if (oldImagePath && oldImagePath !== newImagePath) {
+            result.oldImageCleanup.attempted = true;
+            
+            try {
+                const deletionResult = await deleteProductImage(oldImagePath);
+                result.oldImageCleanup.success = deletionResult.success;
+                result.oldImageCleanup.deletedFiles = deletionResult.deletedFiles;
+                result.oldImageCleanup.errors = deletionResult.errors;
+
+                // Log cleanup results
+                if (deletionResult.errors.length > 0) {
+                    console.warn('Errors during old image cleanup:', deletionResult.errors);
+                    // Don't fail the replacement if cleanup has issues
+                }
+
+                if (deletionResult.deletedFiles.length > 0) {
+                    console.log('Successfully cleaned up old image files:', deletionResult.deletedFiles);
+                }
+
+            } catch (cleanupError) {
+                const errorMessage = `Error during old image cleanup: ${cleanupError.message}`;
+                result.oldImageCleanup.errors.push(errorMessage);
+                console.error(errorMessage);
+                // Don't fail the replacement if cleanup has issues
+            }
+        }
+
+        return result;
+
+    } catch (error) {
+        result.errors.push(`Error during image replacement: ${error.message}`);
+        result.success = false;
+        return result;
+    }
+};
+
+/**
+ * Validates that an image file exists and is accessible
+ * 
+ * @param {string} relativePath - Relative path to validate
+ * @returns {Promise<{exists: boolean, filename: string, absolutePath: string, error?: string}>} Validation result
+ */
+const validateImageExists = async (relativePath) => {
+    const result = {
+        exists: false,
+        filename: null,
+        absolutePath: null
+    };
+
+    try {
+        if (!relativePath) {
+            result.error = 'No image path provided';
+            return result;
+        }
+
+        const filename = extractFilenameFromPath(relativePath);
+        if (!filename) {
+            result.error = 'Invalid image path format';
+            return result;
+        }
+
+        const absolutePath = getAbsoluteImagePath(filename);
+        result.filename = filename;
+        result.absolutePath = absolutePath;
+
+        if (fs.existsSync(absolutePath)) {
+            result.exists = true;
+        } else {
+            result.error = 'Image file does not exist';
+        }
+
+        return result;
+
+    } catch (error) {
+        result.error = `Error validating image: ${error.message}`;
+        return result;
+    }
+};
+
 module.exports = {
     ensureDirectoriesExist,
     generateUniqueFilename,
@@ -209,6 +336,8 @@ module.exports = {
     extractFilenameFromPath,
     deleteProductImage,
     deleteMultipleProductImages,
+    replaceProductImage,
+    validateImageExists,
     PRODUCT_IMAGES_BASE_DIR,
     PRODUCT_IMAGES_UPLOADS_DIR,
     PRODUCT_IMAGES_THUMBNAILS_DIR

@@ -111,7 +111,7 @@
     - Add cleanup on product deletion
     - _Requirements: 4.5_
 
-  - [ ] 5.4 Add image replacement handling
+  - [x] 5.4 Add image replacement handling
     - Implement logic for updating product images
     - Add old image cleanup
     - _Requirements: 4.6_
