@@ -106,7 +106,7 @@
     - Create image processing utilities
     - _Requirements: 4.1, 4.2, 4.3_
 
-  - [ ] 5.3 Implement image deletion functionality
+  - [x] 5.3 Implement image deletion functionality
     - Create utility for removing image files
     - Add cleanup on product deletion
     - _Requirements: 4.5_

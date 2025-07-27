@@ -435,25 +435,24 @@ router.put('/products/:id', (req, res) => {
 /**
  * DELETE /api/admin/products/:id
  * 
- * Deletes a specific product by ID
+ * Deletes a specific product by ID and associated image files
  * Only accessible by admin users
  * 
  * @param {number} id - Product ID in URL path
  * 
- * @returns {Object} Success message
+ * @returns {Object} Success message with deletion details
  * @response {200} Product deleted successfully
  * @response {401} Not authenticated
  * @response {403} Not authorized (not an admin)
  * @response {404} Product not found
  * @response {500} Server error
  */
-router.delete('/products/:id', (req, res) => {
+router.delete('/products/:id', async (req, res) => {
   const productId = req.params.id;
-  const fs = require('fs');
-  const path = require('path');
+  const { deleteProductImage } = require('../utils/fileStorage');
   
   // First get the product to check if it exists and to get the image path
-  db.get('SELECT * FROM products WHERE id = ?', [productId], (err, product) => {
+  db.get('SELECT * FROM products WHERE id = ?', [productId], async (err, product) => {
     if (err) {
       return res.status(500).json({ error: 'Database error', details: err.message });
     }
@@ -463,7 +462,7 @@ router.delete('/products/:id', (req, res) => {
     }
     
     // Delete the product from the database
-    db.run('DELETE FROM products WHERE id = ?', [productId], function(err) {
+    db.run('DELETE FROM products WHERE id = ?', [productId], async function(err) {
       if (err) {
         return res.status(500).json({ error: 'Error deleting product', details: err.message });
       }
@@ -472,32 +471,47 @@ router.delete('/products/:id', (req, res) => {
         return res.status(404).json({ error: 'Product not found' });
       }
       
-      // If product has an image, attempt to delete it
+      // Initialize response data
+      const responseData = {
+        message: 'Product deleted successfully',
+        productId,
+        imageCleanup: {
+          attempted: false,
+          success: false,
+          deletedFiles: [],
+          errors: []
+        }
+      };
+      
+      // If product has an image, attempt to delete it using the utility function
       if (product.image) {
+        responseData.imageCleanup.attempted = true;
+        
         try {
-          // Determine the full path to the image
-          // Assuming images are stored in public/images/products
-          const imagePath = path.join(__dirname, '../../public', product.image);
+          const deletionResult = await deleteProductImage(product.image);
+          responseData.imageCleanup.success = deletionResult.success;
+          responseData.imageCleanup.deletedFiles = deletionResult.deletedFiles;
+          responseData.imageCleanup.errors = deletionResult.errors;
           
-          // Check if file exists before attempting to delete
-          if (fs.existsSync(imagePath)) {
-            fs.unlink(imagePath, (err) => {
-              if (err) {
-                // Log error but don't fail the request
-                console.error(`Error deleting image file: ${imagePath}`, err);
-              }
-            });
+          // Log any errors but don't fail the request
+          if (deletionResult.errors.length > 0) {
+            console.error(`Image deletion errors for product ${productId}:`, deletionResult.errors);
           }
+          
+          // Log successful deletions
+          if (deletionResult.deletedFiles.length > 0) {
+            console.log(`Successfully deleted image files for product ${productId}:`, deletionResult.deletedFiles);
+          }
+          
         } catch (error) {
           // Log error but don't fail the request
-          console.error(`Error processing image deletion for product ${productId}:`, error);
+          const errorMessage = `Error processing image deletion for product ${productId}: ${error.message}`;
+          console.error(errorMessage);
+          responseData.imageCleanup.errors.push(errorMessage);
         }
       }
       
-      res.json({
-        message: 'Product deleted successfully',
-        productId
-      });
+      res.json(responseData);
     });
   });
 });
@@ -577,20 +591,19 @@ router.post('/products/:id/image', (req, res) => {
             });
           }
           
-          // Clean up old image file if it exists
+          // Clean up old image file if it exists using the utility function
           if (oldImagePath) {
             try {
-              const fs = require('fs');
-              const path = require('path');
-              const oldImageFullPath = path.join(__dirname, '../../public', oldImagePath);
-              
-              if (fs.existsSync(oldImageFullPath)) {
-                fs.unlink(oldImageFullPath, (err) => {
-                  if (err) {
-                    console.error(`Error deleting old image file: ${oldImageFullPath}`, err);
-                  }
-                });
-              }
+              const { deleteProductImage } = require('../utils/fileStorage');
+              deleteProductImage(oldImagePath).then(deletionResult => {
+                if (deletionResult.errors.length > 0) {
+                  console.error(`Error deleting old image files for product ${productId}:`, deletionResult.errors);
+                } else if (deletionResult.deletedFiles.length > 0) {
+                  console.log(`Successfully cleaned up old image files for product ${productId}:`, deletionResult.deletedFiles);
+                }
+              }).catch(error => {
+                console.error('Error processing old image cleanup:', error);
+              });
             } catch (error) {
               console.error('Error processing old image cleanup:', error);
             }

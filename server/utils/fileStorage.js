@@ -10,7 +10,7 @@ const path = require('path');
 const crypto = require('crypto');
 
 // Base directories for product images
-const PRODUCT_IMAGES_BASE_DIR = path.join(__dirname, '../../public/images/products');
+const PRODUCT_IMAGES_BASE_DIR = path.join(__dirname, '../public/images/products');
 const PRODUCT_IMAGES_UPLOADS_DIR = path.join(PRODUCT_IMAGES_BASE_DIR, 'uploads');
 const PRODUCT_IMAGES_THUMBNAILS_DIR = path.join(PRODUCT_IMAGES_BASE_DIR, 'thumbnails');
 
@@ -96,7 +96,109 @@ const getAbsoluteImagePath = (filename, type = 'original') => {
 const extractFilenameFromPath = (relativePath) => {
     if (!relativePath) return null;
 
+    // Validate that the path follows the expected format
+    if (!relativePath.startsWith('/images/products/')) {
+        return null;
+    }
+
     return path.basename(relativePath);
+};
+
+/**
+ * Deletes image files associated with a product
+ * Removes both the original image and thumbnail if they exist
+ * 
+ * @param {string} relativePath - Relative path stored in database (e.g., "/images/products/uploads/filename.jpg")
+ * @returns {Promise<{success: boolean, deletedFiles: string[], errors: string[]}>} Result of deletion operation
+ */
+const deleteProductImage = async (relativePath) => {
+    const result = {
+        success: true,
+        deletedFiles: [],
+        errors: []
+    };
+
+    if (!relativePath) {
+        return result;
+    }
+
+    try {
+        const filename = extractFilenameFromPath(relativePath);
+        if (!filename) {
+            result.errors.push('Invalid image path provided');
+            result.success = false;
+            return result;
+        }
+
+        // Get absolute paths for both original and thumbnail
+        const originalPath = getAbsoluteImagePath(filename, 'original');
+        const thumbnailPath = getAbsoluteImagePath(filename, 'thumbnail');
+
+        // Delete original image
+        try {
+            if (fs.existsSync(originalPath)) {
+                await fs.promises.unlink(originalPath);
+                result.deletedFiles.push(originalPath);
+            }
+        } catch (error) {
+            result.errors.push(`Failed to delete original image: ${error.message}`);
+            result.success = false;
+        }
+
+        // Delete thumbnail image
+        try {
+            if (fs.existsSync(thumbnailPath)) {
+                await fs.promises.unlink(thumbnailPath);
+                result.deletedFiles.push(thumbnailPath);
+            }
+        } catch (error) {
+            result.errors.push(`Failed to delete thumbnail image: ${error.message}`);
+            result.success = false;
+        }
+
+    } catch (error) {
+        result.errors.push(`Error processing image deletion: ${error.message}`);
+        result.success = false;
+    }
+
+    return result;
+};
+
+/**
+ * Deletes multiple product images
+ * Useful for bulk operations or cleanup
+ * 
+ * @param {string[]} relativePaths - Array of relative paths stored in database
+ * @returns {Promise<{success: boolean, totalDeleted: number, totalErrors: number, results: Array}>} Results of all deletion operations
+ */
+const deleteMultipleProductImages = async (relativePaths) => {
+    const overallResult = {
+        success: true,
+        totalDeleted: 0,
+        totalErrors: 0,
+        results: []
+    };
+
+    if (!Array.isArray(relativePaths) || relativePaths.length === 0) {
+        return overallResult;
+    }
+
+    for (const relativePath of relativePaths) {
+        const result = await deleteProductImage(relativePath);
+        overallResult.results.push({
+            path: relativePath,
+            ...result
+        });
+
+        overallResult.totalDeleted += result.deletedFiles.length;
+        overallResult.totalErrors += result.errors.length;
+
+        if (!result.success) {
+            overallResult.success = false;
+        }
+    }
+
+    return overallResult;
 };
 
 module.exports = {
@@ -105,6 +207,8 @@ module.exports = {
     getRelativeImagePath,
     getAbsoluteImagePath,
     extractFilenameFromPath,
+    deleteProductImage,
+    deleteMultipleProductImages,
     PRODUCT_IMAGES_BASE_DIR,
     PRODUCT_IMAGES_UPLOADS_DIR,
     PRODUCT_IMAGES_THUMBNAILS_DIR
