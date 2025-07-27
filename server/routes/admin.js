@@ -9,6 +9,8 @@ const express = require('express');
 const router = express.Router();
 const sqlite3 = require('sqlite3').verbose();
 const { authenticateToken, requireAdmin } = require('../middleware/auth');
+const { uploadSingleImage, handleUploadError } = require('../middleware/upload');
+const { processUploadedImage, cleanupFailedUpload } = require('../utils/imageProcessing');
 
 // Connect to SQLite database
 const path = require('path');
@@ -497,6 +499,193 @@ router.delete('/products/:id', (req, res) => {
         productId
       });
     });
+  });
+});
+
+/**
+ * POST /api/admin/products/:id/image
+ * 
+ * Uploads an image for a specific product
+ * Only accessible by admin users
+ * 
+ * @param {number} id - Product ID in URL path
+ * @param {File} image - Image file in multipart form data
+ * 
+ * @returns {Object} Upload result with image information
+ * @response {200} Image uploaded successfully
+ * @response {400} Validation error or upload error
+ * @response {401} Not authenticated
+ * @response {403} Not authorized (not an admin)
+ * @response {404} Product not found
+ * @response {500} Server error
+ */
+router.post('/products/:id/image', (req, res) => {
+  const productId = req.params.id;
+  
+  // First check if product exists
+  db.get('SELECT * FROM products WHERE id = ?', [productId], (err, product) => {
+    if (err) {
+      return res.status(500).json({ error: 'Database error', details: err.message });
+    }
+    
+    if (!product) {
+      return res.status(404).json({ error: 'Product not found' });
+    }
+    
+    // Handle file upload
+    uploadSingleImage(req, res, async (uploadErr) => {
+      if (uploadErr) {
+        return handleUploadError(uploadErr, req, res, () => {
+          res.status(500).json({ error: 'Upload failed', details: uploadErr.message });
+        });
+      }
+      
+      // Check if file was uploaded
+      if (!req.file) {
+        return res.status(400).json({ error: 'No image file provided' });
+      }
+      
+      try {
+        // Process the uploaded image
+        const processingResult = await processUploadedImage(req.file);
+        
+        if (!processingResult.success) {
+          // Clean up the uploaded file if processing failed
+          cleanupFailedUpload(req.file.path);
+          return res.status(400).json({ 
+            error: 'Image processing failed', 
+            details: processingResult.error 
+          });
+        }
+        
+        const imageInfo = processingResult.file;
+        
+        // Store old image path for cleanup
+        const oldImagePath = product.image;
+        
+        // Update product with new image path
+        const updateSql = 'UPDATE products SET image = ?, updatedAt = ? WHERE id = ?';
+        const updateParams = [imageInfo.relativePath, new Date().toISOString(), productId];
+        
+        db.run(updateSql, updateParams, function(updateErr) {
+          if (updateErr) {
+            // Clean up the uploaded file if database update failed
+            cleanupFailedUpload(req.file.path);
+            return res.status(500).json({ 
+              error: 'Error updating product image', 
+              details: updateErr.message 
+            });
+          }
+          
+          // Clean up old image file if it exists
+          if (oldImagePath) {
+            try {
+              const fs = require('fs');
+              const path = require('path');
+              const oldImageFullPath = path.join(__dirname, '../../public', oldImagePath);
+              
+              if (fs.existsSync(oldImageFullPath)) {
+                fs.unlink(oldImageFullPath, (err) => {
+                  if (err) {
+                    console.error(`Error deleting old image file: ${oldImageFullPath}`, err);
+                  }
+                });
+              }
+            } catch (error) {
+              console.error('Error processing old image cleanup:', error);
+            }
+          }
+          
+          // Return success response
+          res.json({
+            message: 'Image uploaded successfully',
+            productId,
+            image: {
+              filename: imageInfo.filename,
+              originalName: imageInfo.originalName,
+              size: imageInfo.size,
+              path: imageInfo.relativePath,
+              uploadedAt: imageInfo.uploadedAt
+            }
+          });
+        });
+        
+      } catch (error) {
+        // Clean up the uploaded file if an error occurred
+        cleanupFailedUpload(req.file.path);
+        res.status(500).json({ 
+          error: 'Server error during image processing', 
+          details: error.message 
+        });
+      }
+    });
+  });
+});
+
+/**
+ * POST /api/admin/upload/image
+ * 
+ * Standalone image upload endpoint for general use
+ * Only accessible by admin users
+ * 
+ * @param {File} image - Image file in multipart form data
+ * 
+ * @returns {Object} Upload result with image information
+ * @response {200} Image uploaded successfully
+ * @response {400} Validation error or upload error
+ * @response {401} Not authenticated
+ * @response {403} Not authorized (not an admin)
+ * @response {500} Server error
+ */
+router.post('/upload/image', (req, res) => {
+  // Handle file upload
+  uploadSingleImage(req, res, async (uploadErr) => {
+    if (uploadErr) {
+      return handleUploadError(uploadErr, req, res, () => {
+        res.status(500).json({ error: 'Upload failed', details: uploadErr.message });
+      });
+    }
+    
+    // Check if file was uploaded
+    if (!req.file) {
+      return res.status(400).json({ error: 'No image file provided' });
+    }
+    
+    try {
+      // Process the uploaded image
+      const processingResult = await processUploadedImage(req.file);
+      
+      if (!processingResult.success) {
+        // Clean up the uploaded file if processing failed
+        cleanupFailedUpload(req.file.path);
+        return res.status(400).json({ 
+          error: 'Image processing failed', 
+          details: processingResult.error 
+        });
+      }
+      
+      const imageInfo = processingResult.file;
+      
+      // Return success response
+      res.json({
+        message: 'Image uploaded successfully',
+        image: {
+          filename: imageInfo.filename,
+          originalName: imageInfo.originalName,
+          size: imageInfo.size,
+          path: imageInfo.relativePath,
+          uploadedAt: imageInfo.uploadedAt
+        }
+      });
+      
+    } catch (error) {
+      // Clean up the uploaded file if an error occurred
+      cleanupFailedUpload(req.file.path);
+      res.status(500).json({ 
+        error: 'Server error during image processing', 
+        details: error.message 
+      });
+    }
   });
 });
 

@@ -100,7 +100,7 @@
     - Implement file naming conventions
     - _Requirements: 4.3_
 
-  - [ ] 5.2 Create image upload endpoint
+  - [x] 5.2 Create image upload endpoint
     - Implement file upload handling
     - Add file type and size validation
     - Create image processing utilities
