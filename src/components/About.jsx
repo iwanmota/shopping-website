@@ -28,7 +28,7 @@ const About = () => {
                 {/* Main company image */}
                 <div className="about-image">
                     <img 
-                        src="/images/about/store-front.jpg" 
+                        src="/images/about/store-front-2.png"
                         alt="ShopSmart Store Front" 
                         className="main-image"
                     />

@@ -14,8 +14,9 @@
   overflow: hidden;
   border: 1px solid var(--line);
   background:
-    linear-gradient(90deg, rgba(4, 12, 19, .97) 0%, rgba(7, 20, 28, .88) 45%, rgba(14, 37, 48, .36) 100%),
-    url('../../public/images/about/store-front.jpg') center/cover;
+    linear-gradient(115deg, rgba(5, 15, 23, .98) 0%, rgba(10, 31, 41, .94) 52%, rgba(18, 47, 59, .82) 100%),
+    radial-gradient(circle at 82% 34%, rgba(169, 189, 210, .2), transparent 24rem),
+    radial-gradient(circle at 68% 100%, rgba(80, 120, 140, .16), transparent 28rem);
 }
 .sale-banner::after {
   content: 'CURATED ESSENTIALS / 2026';
