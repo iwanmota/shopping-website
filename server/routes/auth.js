@@ -10,9 +10,10 @@ const router = express.Router();
 const sqlite3 = require('sqlite3').verbose();
 const { hashPassword, verifyPassword } = require('../utils/auth');
 const { generateToken, authenticateToken } = require('../middleware/auth');
+const { DATABASE_PATH } = require('../config/database');
 
 // Connect to SQLite database
-const db = new sqlite3.Database('./shopping.db');
+const db = new sqlite3.Database(DATABASE_PATH);
 
 /**
  * Validate email format

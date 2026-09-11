@@ -4,9 +4,10 @@
 
 const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
+const { DATABASE_PATH } = require('./config/database');
 
 // Connect to SQLite database
-const db = new sqlite3.Database(path.join(__dirname, './shopping.db'));
+const db = new sqlite3.Database(DATABASE_PATH);
 
 // Query to get table info
 db.all(`PRAGMA table_info(products)`, (err, rows) => {

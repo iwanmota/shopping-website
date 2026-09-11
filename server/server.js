@@ -13,6 +13,7 @@ const sqlite3 = require('sqlite3').verbose(); // Use verbose mode for more detai
 const cors = require('cors');
 const path = require('path');
 const { authErrorHandler } = require('./middleware/auth');
+const { DATABASE_PATH } = require('./config/database');
 
 // Import routes
 const authRoutes = require('./routes/auth');
@@ -30,7 +31,7 @@ app.use(express.json()); // Parse JSON request bodies
 app.use(express.static(path.join(__dirname, '../public'))); // Serve static files from public directory
 
 // Connect to SQLite database
-const db = new sqlite3.Database('./shopping.db');
+const db = new sqlite3.Database(DATABASE_PATH);
 
 /**
  * GET /api/products

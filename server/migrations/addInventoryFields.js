@@ -15,10 +15,11 @@
 
 const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
+const { DATABASE_PATH } = require('../config/database');
 const fs = require('fs');
 
 // Path to the database file
-const dbPath = path.resolve(__dirname, '../shopping.db');
+const dbPath = DATABASE_PATH;
 
 // Check if database file exists
 if (!fs.existsSync(dbPath)) {

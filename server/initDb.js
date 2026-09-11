@@ -12,9 +12,10 @@
 const sqlite3 = require('sqlite3').verbose();
 // Import bcrypt for password hashing
 const bcrypt = require('bcrypt');
+const { DATABASE_PATH } = require('./config/database');
 
 // Connect to the database (creates it if it doesn't exist)
-const db = new sqlite3.Database('./shopping.db');
+const db = new sqlite3.Database(DATABASE_PATH);
 
 /**
  * Database initialization process

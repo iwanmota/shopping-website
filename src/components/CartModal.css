@@ -13,6 +13,7 @@
 
 .modal-content {
     background: var(--primary-white);
+    box-sizing: border-box;
     width: 100%;
     max-width: 500px;
     height: 100%;

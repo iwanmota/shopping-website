@@ -11,10 +11,10 @@ const sqlite3 = require('sqlite3').verbose();
 const { authenticateToken, requireAdmin } = require('../middleware/auth');
 const { uploadSingleImage, handleUploadError } = require('../middleware/upload');
 const { processUploadedImage, cleanupFailedUpload } = require('../utils/imageProcessing');
+const { DATABASE_PATH } = require('../config/database');
 
 // Connect to SQLite database
-const path = require('path');
-const db = new sqlite3.Database(path.join(__dirname, '../shopping.db'));
+const db = new sqlite3.Database(DATABASE_PATH);
 
 // Apply authentication and admin role middleware to all routes
 router.use(authenticateToken, requireAdmin);
