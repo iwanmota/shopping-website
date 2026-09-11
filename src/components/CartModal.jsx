@@ -6,8 +6,10 @@
  * 
  * @component
  */
-import React from 'react';
+import React, { useState } from 'react';
 import { useCart } from '../context/CartContext';
+import { useAuth } from '../context/AuthContext';
+import { checkout } from '../services/checkout';
 import './CartModal.css';
 
 /**
@@ -18,9 +20,12 @@ import './CartModal.css';
  * @param {Function} props.onClose - Handler function to close the modal
  * @returns {React.ReactElement|null} Cart modal component or null when closed
  */
-const CartModal = ({ isOpen, onClose }) => {
+const CartModal = ({ isOpen, onClose, onCheckoutSuccess }) => {
     // Get cart state and functions from context
     const { cartItems, removeFromCart, updateQuantity, clearCart, cartTotal } = useCart();
+    const { isAuthenticated, token } = useAuth();
+    const [checkoutError, setCheckoutError] = useState('');
+    const [checkingOut, setCheckingOut] = useState(false);
 
     // Don't render anything if modal is closed
     if (!isOpen) return null;
@@ -32,6 +37,25 @@ const CartModal = ({ isOpen, onClose }) => {
      * @returns {string} Formatted price with 2 decimal places
      */
     const formatPrice = (price) => price.toFixed(2);
+
+    const handleCheckout = async () => {
+        if (!isAuthenticated) {
+            setCheckoutError('Please log in before checking out.');
+            return;
+        }
+
+        setCheckoutError('');
+        setCheckingOut(true);
+        try {
+            const receipt = await checkout(cartItems, token);
+            clearCart();
+            onCheckoutSuccess(receipt);
+        } catch (error) {
+            setCheckoutError(error.message);
+        } finally {
+            setCheckingOut(false);
+        }
+    };
 
     return (
         <div className="modal-overlay" onClick={onClose}>
@@ -56,7 +80,7 @@ const CartModal = ({ isOpen, onClose }) => {
                     ) : (
                         <ul>
                             {cartItems.map(item => (
-                                <li key={`${item.id}-${item.isOnSale ? 'sale' : 'regular'}`} className="cart-item">
+                                <li key={item.lineId} className="cart-item">
                                     <div className="item-image">
                                         <img src={item.image} alt={item.name} />
                                     </div>
@@ -76,14 +100,14 @@ const CartModal = ({ isOpen, onClose }) => {
                                         {/* Quantity adjustment controls */}
                                         <div className="quantity-controls">
                                             <button 
-                                                onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                                                onClick={() => updateQuantity(item.lineId, item.quantity - 1)}
                                                 disabled={item.quantity <= 1}
                                             >
                                                 -
                                             </button>
                                             <span>{item.quantity}</span>
                                             <button 
-                                                onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                                                onClick={() => updateQuantity(item.lineId, item.quantity + 1)}
                                             >
                                                 +
                                             </button>
@@ -91,7 +115,7 @@ const CartModal = ({ isOpen, onClose }) => {
                                         {/* Remove item button */}
                                         <button 
                                             className="remove-button"
-                                            onClick={() => removeFromCart(item.id)}
+                                            onClick={() => removeFromCart(item.lineId)}
                                         >
                                             <i className="fas fa-trash"></i>
                                         </button>
@@ -118,8 +142,9 @@ const CartModal = ({ isOpen, onClose }) => {
                                 )}
                             </div>
                         </div>
-                        <button className="checkout-button">
-                            Proceed to Checkout
+                        {checkoutError && <p className="checkout-error" role="alert">{checkoutError}</p>}
+                        <button className="checkout-button" onClick={handleCheckout} disabled={checkingOut}>
+                            {checkingOut ? 'Processing...' : 'Proceed to Checkout'}
                         </button>
                     </div>
                 )}

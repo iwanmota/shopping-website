@@ -18,9 +18,11 @@ const { DATABASE_PATH } = require('./config/database');
 // Import routes
 const authRoutes = require('./routes/auth');
 const adminRoutes = require('./routes/admin');
+const checkoutRoutes = require('./routes/checkout');
 
 // Import file storage initialization
 const initFileStorage = require('./utils/initFileStorage');
+const { ensureProductInventorySchema } = require('./services/databaseSchema');
 
 // Initialize Express application
 const app = express();
@@ -110,31 +112,7 @@ app.get('/api/products/:id', (req, res) => {
  * @response {500} Server error
  */
 app.post('/api/products/purchase', (req, res) => {
-    const { id, quantity, isOnSale } = req.body;
-    
-    if (isOnSale) {
-        // Update sale inventory, ensuring there's enough stock
-        db.run(
-            'UPDATE products SET onSaleQuantity = onSaleQuantity - ? WHERE id = ? AND onSaleQuantity >= ?',
-            [quantity, id, quantity],
-            function(err) {
-                if (err) {
-                    res.status(500).json({ error: err.message });
-                    return;
-                }
-                // Check if update was successful (changes will be 0 if not enough stock)
-                if (this.changes === 0) {
-                    res.status(400).json({ error: 'Not enough sale items in stock' });
-                    return;
-                }
-                res.json({ message: 'Purchase successful' });
-            }
-        );
-    } else {
-        // TODO: Implement regular inventory tracking
-        // Currently just returns success without updating any inventory
-        res.json({ message: 'Purchase successful' });
-    }
+    res.status(410).json({ error: 'This endpoint has been replaced by POST /api/checkout' });
 });
 
 // Register authentication routes
@@ -142,6 +120,9 @@ app.use('/api/auth', authRoutes);
 
 // Register admin routes
 app.use('/api/admin', adminRoutes);
+
+// Register checkout route
+app.use('/api/checkout', checkoutRoutes);
 
 // Register authentication error handler
 app.use(authErrorHandler);
@@ -153,6 +134,7 @@ const PORT = process.env.PORT || 3001;
 (async () => {
     try {
         await initFileStorage();
+        await ensureProductInventorySchema(db);
         app.listen(PORT, () => {
             console.log(`Server running on port ${PORT}`);
         });

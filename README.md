@@ -41,9 +41,9 @@ This is a shopping website that allows users to browse products, manage a shoppi
    ```
    This creates a `shopping.db` file with sample data defined in `server/initDb.js`
 
-6. Start the backend server:
+6. Start the backend server with a local JWT secret:
    ```
-   node server/server.js
+   JWT_SECRET=local-development-secret node server/server.js
    ```
    The server will run on http://localhost:3001
 

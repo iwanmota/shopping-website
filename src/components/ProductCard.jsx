@@ -32,7 +32,7 @@ const ProductCard = ({ product, onImageClick, showToast }) => {
     const { addToCart } = useCart();
     
     // Determine if product is currently on sale with available quantity
-    const isOnSale = product.isOnSale && product.onSaleQuantity > 0;
+    const isOnSale = Boolean(product.isOnSale && product.onSaleQuantity > 0);
     
     /**
      * Calculate percentage discount between original and sale price

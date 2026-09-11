@@ -21,12 +21,12 @@ const CartContext = createContext();
  * @param {Object} action - Action object with type and payload
  * @returns {Array} Updated cart items array
  */
-const cartReducer = (state, action) => {
+export const cartReducer = (state, action) => {
     switch (action.type) {
         case 'ADD_ITEM': {
             const { id, price, salePrice, onSaleQuantity, isOnSale } = action.payload;
-            const existingSaleItem = state.find(item => item.id === id && item.isOnSale);
-            const existingRegularItem = state.find(item => item.id === id && !item.isOnSale);
+            const existingSaleItem = state.find(item => item.lineId === `${id}-sale`);
+            const existingRegularItem = state.find(item => item.lineId === `${id}-regular`);
             
             let updatedState = [...state];
 
@@ -37,7 +37,7 @@ const cartReducer = (state, action) => {
                     if (existingSaleItem.quantity < onSaleQuantity) {
                         // Can add more at sale price
                         updatedState = state.map(item =>
-                            item.id === id && item.isOnSale
+                            item.lineId === `${id}-sale`
                                 ? { ...item, quantity: item.quantity + 1 }
                                 : item
                         );
@@ -46,31 +46,31 @@ const cartReducer = (state, action) => {
                         if (existingRegularItem) {
                             // Regular version already in cart, increment quantity
                             updatedState = state.map(item =>
-                                item.id === id && !item.isOnSale
+                                item.lineId === `${id}-regular`
                                     ? { ...item, quantity: item.quantity + 1 }
                                     : item
                             );
                         } else {
                             // Add new regular item
-                            updatedState.push({ ...action.payload, isOnSale: false, price, quantity: 1 });
+                            updatedState.push({ ...action.payload, lineId: `${id}-regular`, pricingTier: 'regular', isOnSale: false, price, quantity: 1 });
                         }
                     }
                 } else {
                     // Add new sale item
-                    updatedState.push({ ...action.payload, price: salePrice, isOnSale: true, quantity: 1 });
+                    updatedState.push({ ...action.payload, lineId: `${id}-sale`, pricingTier: 'sale', price: salePrice, isOnSale: true, quantity: 1 });
                 }
             } else {
                 // Handle regular item (not on sale or sale quantity depleted)
                 if (existingRegularItem) {
                     // Regular item already in cart, increment quantity
                     updatedState = state.map(item =>
-                        item.id === id && !item.isOnSale
+                        item.lineId === `${id}-regular`
                             ? { ...item, quantity: item.quantity + 1 }
                             : item
                     );
                 } else {
                     // Add new regular item
-                    updatedState.push({ ...action.payload, isOnSale: false, quantity: 1 });
+                    updatedState.push({ ...action.payload, lineId: `${id}-regular`, pricingTier: 'regular', isOnSale: false, quantity: 1 });
                 }
             }
 
@@ -79,12 +79,12 @@ const cartReducer = (state, action) => {
 
         case 'REMOVE_ITEM':
             // Remove all instances of an item from cart by ID
-            return state.filter(item => item.id !== action.payload);
+            return state.filter(item => item.lineId !== action.payload);
 
         case 'UPDATE_QUANTITY':
             // Update quantity for a specific item
             return state.map(item =>
-                item.id === action.payload.id
+                item.lineId === action.payload.lineId
                     ? { ...item, quantity: action.payload.quantity }
                     : item
             );
@@ -125,8 +125,8 @@ export const CartProvider = ({ children }) => {
      * 
      * @param {number} productId - ID of product to remove
      */
-    const removeFromCart = (productId) => {
-        dispatch({ type: 'REMOVE_ITEM', payload: productId });
+    const removeFromCart = (lineId) => {
+        dispatch({ type: 'REMOVE_ITEM', payload: lineId });
     };
 
     /**
@@ -136,12 +136,12 @@ export const CartProvider = ({ children }) => {
      * @param {number} productId - ID of product to update
      * @param {number} quantity - New quantity value
      */
-    const updateQuantity = (productId, quantity) => {
+    const updateQuantity = (lineId, quantity) => {
         if (quantity < 1) {
-            removeFromCart(productId);
+            removeFromCart(lineId);
             return;
         }
-        dispatch({ type: 'UPDATE_QUANTITY', payload: { id: productId, quantity } });
+        dispatch({ type: 'UPDATE_QUANTITY', payload: { lineId, quantity } });
     };
 
     /**

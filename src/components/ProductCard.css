@@ -46,6 +46,7 @@
 
 .add-to-cart-button {
     width: 100%;
+    margin-top: auto;
     background: linear-gradient(135deg, var(--maple-red), var(--brick-red));
     color: var(--primary-white);
     border: none;

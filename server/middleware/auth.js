@@ -8,8 +8,10 @@
 const jwt = require('jsonwebtoken');
 
 // Secret key for JWT signing and verification
-// In production, this should be stored in environment variables
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-here';
+const JWT_SECRET = process.env.JWT_SECRET || (process.env.NODE_ENV === 'test' ? 'test-only-secret' : null);
+if (!JWT_SECRET) {
+  throw new Error('JWT_SECRET environment variable is required');
+}
 
 // Token expiration time (in seconds)
 const TOKEN_EXPIRATION = '24h';

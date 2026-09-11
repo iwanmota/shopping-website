@@ -40,9 +40,14 @@ const App = () => {
      * This effect runs once when the component mounts and populates
      * the products state with data from the backend API.
      */
-    useEffect(() => {
+    const fetchProducts = () => {
+        setLoading(true);
+        setError(null);
         fetch('http://localhost:3001/api/products')
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) throw new Error('Unable to load products');
+                return response.json();
+            })
             .then(data => {
                 setProducts(data);
                 setLoading(false);
@@ -51,6 +56,10 @@ const App = () => {
                 setError(err.message);
                 setLoading(false);
             });
+    };
+
+    useEffect(() => {
+        fetchProducts();
     }, []);
 
     /**
@@ -134,6 +143,11 @@ const App = () => {
                         <CartModal 
                             isOpen={isCartOpen} 
                             onClose={() => setIsCartOpen(false)}
+                            onCheckoutSuccess={() => {
+                                setIsCartOpen(false);
+                                fetchProducts();
+                                showToast('Checkout successful');
+                            }}
                         />
                         <ImageModal 
                             isOpen={imageModal.isOpen}
