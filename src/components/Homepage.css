@@ -1,140 +1,108 @@
 .homepage-container {
-    padding: 2rem;
-    max-width: 1400px;
-    margin: 0 auto;
+  width: min(1500px, 100%);
+  margin: 0 auto;
+  padding: clamp(3rem, 8vw, 8rem) 5vw 6rem;
 }
-
 .sale-banner {
-    text-align: center;
-    margin-bottom: 3rem;
-    padding: 2rem;
-    background: linear-gradient(135deg, var(--maple-red), var(--brick-red));
-    color: var(--primary-white);
-    border-radius: 20px;
-    box-shadow: 0 10px 30px rgba(52, 152, 219, 0.2);
+  position: relative;
+  min-height: 48vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  margin-bottom: 5rem;
+  padding: clamp(2rem, 6vw, 6rem);
+  overflow: hidden;
+  border: 1px solid var(--line);
+  background:
+    linear-gradient(90deg, rgba(4, 12, 19, .97) 0%, rgba(7, 20, 28, .88) 45%, rgba(14, 37, 48, .36) 100%),
+    url('../../public/images/about/store-front.jpg') center/cover;
 }
-
+.sale-banner::after {
+  content: 'CURATED ESSENTIALS / 2026';
+  position: absolute;
+  top: 2rem;
+  right: 2rem;
+  color: var(--muted);
+  font-size: .68rem;
+  letter-spacing: .22em;
+}
 .sale-banner h1 {
-    font-size: 2.5rem;
-    margin-bottom: 1rem;
+  max-width: 950px;
+  margin: 0;
+  color: var(--text-bright);
+  font: 200 clamp(3.2rem, 9vw, 8.5rem)/.95 'Montserrat', sans-serif;
+  letter-spacing: -.045em;
 }
-
+.sale-banner h1::after { content: ' for modern living.'; color: var(--accent); }
+.sale-banner p {
+  max-width: 460px;
+  margin: 2rem 0 0;
+  color: var(--muted);
+  font-size: 1.05rem;
+  font-style: italic;
+  line-height: 1.6;
+}
 .sale-products {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 2rem;
-    margin-bottom: 3rem;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1px;
+  margin-bottom: 3rem;
+  background: var(--line);
+  border: 1px solid var(--line);
 }
-
 .sale-product-card {
-    position: relative;
-    background: var(--primary-white);
-    border-radius: 16px;
-    padding: 1.5rem;
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
-    transition: transform 0.3s ease;
-    border: 1px solid rgba(124, 37, 41, 0.1);
+  position: relative;
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  padding: 1.25rem;
+  background: var(--ink-soft);
+  transition: background .25s ease;
 }
-
-.sale-product-card:hover {
-    transform: translateY(-5px);
+.sale-product-card:hover { background: var(--surface); }
+.sale-product-card .product-image {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  filter: saturate(.72) contrast(1.05);
 }
-
 .discount-badge {
-    position: absolute;
-    top: 1rem;
-    right: 1rem;
-    background: var(--maple-red);
-    color: var(--primary-white);
-    padding: 0.5rem 1rem;
-    border-radius: 20px;
-    font-weight: bold;
+  position: absolute;
+  top: 2rem;
+  right: 2rem;
+  z-index: 1;
+  padding: .45rem .65rem;
+  background: var(--text-bright);
+  color: var(--ink);
+  font-size: .68rem;
+  font-weight: 600;
+  letter-spacing: .1em;
 }
-
-.product-info {
-    margin-top: 1rem;
+.product-info { display: flex; flex: 1; flex-direction: column; padding-top: 1.25rem; }
+.product-info h2 {
+  margin: 0;
+  color: var(--text-bright);
+  font: 300 1.25rem/1.25 'Montserrat', sans-serif;
 }
-
-.price-container {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    margin: 1rem 0;
+.price-container { display: flex; align-items: baseline; gap: 1rem; margin: 1rem 0 .25rem; }
+.original-price { color: var(--muted); text-decoration: line-through; font-size: .82rem; }
+.sale-price { color: var(--text-bright); font-size: 1.15rem; }
+.stock-info { color: var(--muted); font-size: .8rem; }
+.sale-product-card .add-to-cart-button, .view-all-button {
+  min-height: 48px;
+  border: 1px solid var(--accent);
+  background: transparent;
+  color: var(--text-bright);
+  cursor: pointer;
+  text-decoration: none;
+  transition: color .25s ease, background .25s ease;
 }
-
-.original-price {
-    color: #7f8c8d;
-    text-decoration: line-through;
-    font-size: 1.1rem;
+.sale-product-card .add-to-cart-button { width: 100%; margin-top: auto; }
+.sale-product-card .add-to-cart-button:hover, .view-all-button:hover { background: var(--accent); color: var(--ink); }
+.view-all-button { display: inline-flex; align-items: center; gap: .75rem; padding: 0 1.5rem; }
+@media (max-width: 900px) { .sale-products { grid-template-columns: 1fr; } }
+@media (max-width: 600px) {
+  .homepage-container { padding: 2rem 1rem 4rem; }
+  .sale-banner { min-height: 55vh; padding: 2rem 1.25rem; }
+  .sale-banner::after { top: 1rem; right: 1rem; }
 }
-
-.sale-price {
-    color: var(--maple-red);
-    font-size: 1.4rem;
-    font-weight: bold;
-}
-
-.stock-info {
-    color: #e67e22;
-    font-size: 0.9rem;
-    font-weight: 500;
-}
-
-.view-all-button {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    background: linear-gradient(135deg, #2ecc71, #27ae60);
-    color: white;
-    padding: 1rem 2rem;
-    border-radius: 12px;
-    text-decoration: none;
-    font-weight: 600;
-    transition: all 0.3s ease;
-}
-
-.view-all-button:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(46, 204, 113, 0.3);
-}
-
-.sale-product-card .add-to-cart-button {
-    width: 100%;
-    background: linear-gradient(135deg, var(--maple-red), var(--brick-red));
-    color: var(--primary-white);
-    border: none;
-    padding: 1rem;
-    border-radius: 12px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    margin-top: 1rem;
-}
-
-.sale-product-card .add-to-cart-button:hover {
-    background: linear-gradient(135deg, var(--brick-red), var(--autumn-red));
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(124, 37, 41, 0.2);
-}
-
-.sale-product-card .add-to-cart-button i {
-    font-size: 0.9rem;
-}
-
-.sale-banner::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 4px;
-    background: linear-gradient(90deg, 
-        var(--accent-gold) 0%, 
-        var(--autumn-red) 50%, 
-        var(--accent-gold) 100%
-    );
-} 

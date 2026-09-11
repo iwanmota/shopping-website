@@ -3,6 +3,7 @@ import { checkout } from './checkout';
 test('submits only product identity, quantity, and pricing tier with authentication', async () => {
   const fetchMock = jest.fn().mockResolvedValue({
     ok: true,
+    headers: { get: () => 'application/json' },
     json: async () => ({ receipt: { id: 'local-1' } })
   });
   const items = [{ id: 1, quantity: 2, pricingTier: 'sale', price: 0.01, name: 'Ignored' }];
@@ -25,8 +26,21 @@ test('submits only product identity, quantity, and pricing tier with authenticat
 test('throws the server checkout error', async () => {
   const fetchMock = jest.fn().mockResolvedValue({
     ok: false,
+    headers: { get: () => 'application/json' },
     json: async () => ({ error: 'Not enough inventory' })
   });
 
   await expect(checkout([], 'token-123', fetchMock)).rejects.toThrow('Not enough inventory');
+});
+
+test('explains when the running backend does not have the checkout route', async () => {
+  const fetchMock = jest.fn().mockResolvedValue({
+    ok: false,
+    status: 404,
+    headers: { get: () => 'text/html' }
+  });
+
+  await expect(checkout([], 'token-123', fetchMock)).rejects.toThrow(
+    'Checkout endpoint is unavailable. Restart the backend server.'
+  );
 });

@@ -16,6 +16,14 @@ export const checkout = async (cartItems, token, fetchImplementation = fetch) =>
     })
   });
 
+  const contentType = response.headers?.get('content-type') || '';
+  if (!contentType.includes('application/json')) {
+    if (response.status === 404) {
+      throw new Error('Checkout endpoint is unavailable. Restart the backend server.');
+    }
+    throw new Error('Checkout failed because the server returned an unexpected response.');
+  }
+
   const data = await response.json();
   if (!response.ok) {
     throw new Error(data.error || 'Checkout failed');
