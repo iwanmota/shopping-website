@@ -6,30 +6,12 @@
  */
 
 const multer = require('multer');
-const path = require('path');
-const crypto = require('crypto');
-const { 
-  generateUniqueFilename, 
-  getAbsoluteImagePath,
-  PRODUCT_IMAGES_UPLOADS_DIR 
-} = require('../utils/fileStorage');
 const { 
   MAX_FILE_SIZE, 
   ALLOWED_IMAGE_TYPES 
 } = require('../config/fileStorage');
 
-// Configure multer storage
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    // Use the uploads directory from our file storage system
-    cb(null, PRODUCT_IMAGES_UPLOADS_DIR);
-  },
-  filename: (req, file, cb) => {
-    // Generate unique filename using our utility function
-    const uniqueFilename = generateUniqueFilename(file.originalname);
-    cb(null, uniqueFilename);
-  }
-});
+const storage = multer.memoryStorage();
 
 // File filter function to validate file types
 const fileFilter = (req, file, cb) => {

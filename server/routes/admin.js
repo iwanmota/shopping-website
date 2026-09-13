@@ -586,8 +586,10 @@ router.post('/products/:id/image', (req, res) => {
         
         db.run(updateSql, updateParams, async function(updateErr) {
           if (updateErr) {
-            // Clean up the uploaded file if database update failed
-            cleanupFailedUpload(req.file.path);
+            // Clean up generated image files if database update failed
+            const { deleteProductImage } = require('../utils/fileStorage');
+            const cleanupResult = await deleteProductImage(imageInfo.relativePath);
+            if (!cleanupResult.success) console.error('Generated image cleanup failed:', cleanupResult.errors);
             return res.status(500).json({ 
               error: 'Error updating product image', 
               details: updateErr.message 
@@ -725,8 +727,10 @@ router.put('/products/:id/image', (req, res) => {
         
         db.run(updateSql, updateParams, async function(updateErr) {
           if (updateErr) {
-            // Clean up the uploaded file if database update failed
-            cleanupFailedUpload(req.file.path);
+            // Clean up generated image files if database update failed
+            const { deleteProductImage } = require('../utils/fileStorage');
+            const cleanupResult = await deleteProductImage(imageInfo.relativePath);
+            if (!cleanupResult.success) console.error('Generated image cleanup failed:', cleanupResult.errors);
             return res.status(500).json({ 
               error: 'Error updating product image', 
               details: updateErr.message 
