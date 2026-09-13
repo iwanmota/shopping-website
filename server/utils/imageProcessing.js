@@ -7,11 +7,19 @@
 
 const fs = require('fs');
 const path = require('path');
-const { 
-  getAbsoluteImagePath, 
+const {
+  getAbsoluteImagePath,
   getRelativeImagePath,
-  extractFilenameFromPath 
+  extractFilenameFromPath
 } = require('./fileStorage');
+
+const IMAGE_SIGNATURES = {
+  'image/jpeg': buffer => buffer.length >= 3 && buffer[0] === 0xff && buffer[1] === 0xd8 && buffer[2] === 0xff,
+  'image/png': buffer => buffer.subarray(0, 8).equals(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a])),
+  'image/gif': buffer => buffer.subarray(0, 6).toString('ascii').match(/^GIF8[79]a$/) !== null,
+  'image/webp': buffer => buffer.subarray(0, 4).toString('ascii') === 'RIFF'
+    && buffer.subarray(8, 12).toString('ascii') === 'WEBP'
+};
 
 /**
  * Validates an uploaded image file
@@ -32,9 +40,14 @@ const validateUploadedImage = (file) => {
     errors.push('Uploaded file not found');
   }
   
-  // Additional validation can be added here
-  // For example: image dimensions, file integrity, etc.
-  
+  // Verify the file signature instead of trusting the client-provided MIME type.
+  if (fs.existsSync(file.path)) {
+    const signatureValidator = IMAGE_SIGNATURES[file.mimetype];
+    if (!signatureValidator || !signatureValidator(fs.readFileSync(file.path, { end: 11 }))) {
+      errors.push('File content does not match its declared image type');
+    }
+  }
+
   return {
     success: errors.length === 0,
     errors
