@@ -27,18 +27,22 @@ const ImageModal = ({ image, alt, isOpen, onClose }) => {
      * Restores scrolling when the modal is closed or unmounted
      */
     useEffect(() => {
-        if (isOpen) {
-            // Prevent body scrolling when modal is open
-            document.body.style.overflow = 'hidden';
-        } else {
+        if (!isOpen) {
             document.body.style.overflow = 'unset';
+            return undefined;
         }
-        
-        // Cleanup function to ensure scrolling is restored when component unmounts
+
+        document.body.style.overflow = 'hidden';
+        const handleKeyDown = (event) => {
+            if (event.key === 'Escape') onClose();
+        };
+        document.addEventListener('keydown', handleKeyDown);
+
         return () => {
             document.body.style.overflow = 'unset';
+            document.removeEventListener('keydown', handleKeyDown);
         };
-    }, [isOpen]);
+    }, [isOpen, onClose]);
 
     // Don't render anything if modal is closed
     if (!isOpen) return null;
@@ -55,17 +59,22 @@ const ImageModal = ({ image, alt, isOpen, onClose }) => {
     };
 
     return (
-        <div 
-            className="image-modal-overlay" 
+        <div
+            className="image-modal-overlay"
             onClick={onClose}
         >
-            <div 
-                className="image-modal-content" 
+            <div
+                className="image-modal-content"
+                role="dialog"
+                aria-modal="true"
+                aria-label={`Enlarged image: ${alt}`}
                 onClick={handleContentClick}
             >
                 {/* Close button */}
-                <button 
-                    className="close-button" 
+                <button
+                    type="button"
+                    className="close-button"
+                    aria-label="Close image"
                     onClick={(e) => {
                         e.stopPropagation();
                         onClose();
