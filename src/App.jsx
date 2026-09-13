@@ -19,6 +19,7 @@ import CartModal from './components/CartModal';
 import ImageModal from './components/ImageModal';
 import Toast from './components/Toast';
 import OrderHistory from './components/OrderHistory';
+import AdminDashboard from './components/AdminDashboard';
 import ProtectedRoute, { AdminRoute } from './components/ProtectedRoute';
 import './styles/main.css';
 import { CartProvider } from './context/CartContext';
@@ -113,10 +114,7 @@ const App = () => {
                             <Route path="/login" element={<AuthPage />} />
                             <Route path="/admin" element={
                                 <AdminRoute>
-                                    <div className="admin-page">
-                                        <h1>Admin Dashboard</h1>
-                                        <p>This is a protected admin page. Only users with admin role can access it.</p>
-                                    </div>
+                                    <AdminDashboard />
                                 </AdminRoute>
                             } />
                             <Route path="/orders" element={
