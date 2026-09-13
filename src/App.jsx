@@ -18,6 +18,7 @@ import NotFound from './components/NotFound';
 import CartModal from './components/CartModal';
 import ImageModal from './components/ImageModal';
 import Toast from './components/Toast';
+import OrderHistory from './components/OrderHistory';
 import ProtectedRoute, { AdminRoute } from './components/ProtectedRoute';
 import './styles/main.css';
 import { CartProvider } from './context/CartContext';
@@ -117,6 +118,11 @@ const App = () => {
                                         <p>This is a protected admin page. Only users with admin role can access it.</p>
                                     </div>
                                 </AdminRoute>
+                            } />
+                            <Route path="/orders" element={
+                                <ProtectedRoute>
+                                    <OrderHistory />
+                                </ProtectedRoute>
                             } />
                             <Route path="/profile" element={
                                 <ProtectedRoute>

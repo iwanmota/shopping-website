@@ -19,10 +19,12 @@ const { DATABASE_PATH } = require('./config/database');
 const authRoutes = require('./routes/auth');
 const adminRoutes = require('./routes/admin');
 const checkoutRoutes = require('./routes/checkout');
+const orderRoutes = require('./routes/orders');
 
 // Import file storage initialization
 const initFileStorage = require('./utils/initFileStorage');
 const { ensureProductInventorySchema } = require('./services/databaseSchema');
+const { ensureOrderSchema } = require('./services/orderService');
 
 // Initialize Express application
 const app = express();
@@ -121,8 +123,9 @@ app.use('/api/auth', authRoutes);
 // Register admin routes
 app.use('/api/admin', adminRoutes);
 
-// Register checkout route
+// Register checkout and order routes
 app.use('/api/checkout', checkoutRoutes);
+app.use('/api/orders', orderRoutes);
 
 // Register authentication error handler
 app.use(authErrorHandler);
@@ -131,6 +134,7 @@ const startServer = async (port = process.env.PORT || 3001) => {
     try {
         await initFileStorage();
         await ensureProductInventorySchema(db);
+        await ensureOrderSchema(db);
         return app.listen(port, () => {
             console.log(`Server running on port ${port}`);
         });

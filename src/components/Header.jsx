@@ -80,6 +80,9 @@ const Header = ({ onCartClick }) => {
                                     Admin
                                 </Link>
                             )}
+                            <Link to="/orders" className={location.pathname === '/orders' ? 'auth-link active' : 'auth-link'}>
+                                Orders
+                            </Link>
                             <Link to="/profile" className={location.pathname === '/profile' ? 'auth-link active' : 'auth-link'}>
                                 Profile
                             </Link>

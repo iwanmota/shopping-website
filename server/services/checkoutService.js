@@ -1,3 +1,5 @@
+const { ensureOrderSchema } = require('./orderService');
+
 const get = (db, sql, params = []) => new Promise((resolve, reject) => {
   db.get(sql, params, (error, row) => error ? reject(error) : resolve(row));
 });
@@ -37,6 +39,7 @@ const validateItems = items => {
 
 const checkoutCart = async (db, userId, items) => {
   validateItems(items);
+  await ensureOrderSchema(db);
   await run(db, 'BEGIN IMMEDIATE TRANSACTION');
 
   try {
@@ -44,9 +47,7 @@ const checkoutCart = async (db, userId, items) => {
 
     for (const item of items) {
       const product = await get(db, 'SELECT * FROM products WHERE id = ?', [item.productId]);
-      if (!product) {
-        throw new CheckoutError(`Product ${item.productId} was not found`, 404);
-      }
+      if (!product) throw new CheckoutError(`Product ${item.productId} was not found`, 404);
 
       const isSale = item.pricingTier === 'sale';
       if (isSale && (!product.isOnSale || product.salePrice == null)) {
@@ -59,7 +60,6 @@ const checkoutCart = async (db, userId, items) => {
         `UPDATE products SET ${inventoryField} = ${inventoryField} - ? WHERE id = ? AND ${inventoryField} >= ?`,
         [item.quantity, item.productId, item.quantity]
       );
-
       if (update.changes !== 1) {
         throw new CheckoutError(`${product.name} does not have enough ${item.pricingTier} inventory`, 409);
       }
@@ -75,15 +75,18 @@ const checkoutCart = async (db, userId, items) => {
       });
     }
 
-    await run(db, 'COMMIT');
+    const total = Number(receiptItems.reduce((sum, item) => sum + item.subtotal, 0).toFixed(2));
+    const order = await run(db, 'INSERT INTO orders (userId, total, status) VALUES (?, ?, ?)', [userId, total, 'completed']);
+    for (const item of receiptItems) {
+      await run(db, `INSERT INTO order_items
+        (orderId, productId, productName, pricingTier, unitPrice, quantity, subtotal)
+        VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      [order.lastID, item.productId, item.name, item.pricingTier, item.unitPrice, item.quantity, item.subtotal]);
+    }
 
-    return {
-      id: `local-${Date.now()}`,
-      userId,
-      items: receiptItems,
-      total: Number(receiptItems.reduce((sum, item) => sum + item.subtotal, 0).toFixed(2)),
-      purchasedAt: new Date().toISOString()
-    };
+    await run(db, 'COMMIT');
+    const purchasedAt = new Date().toISOString();
+    return { id: order.lastID, userId, items: receiptItems, total, status: 'completed', purchasedAt };
   } catch (error) {
     await run(db, 'ROLLBACK');
     throw error;

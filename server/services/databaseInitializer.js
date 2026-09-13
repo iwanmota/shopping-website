@@ -1,4 +1,5 @@
 const bcrypt = require('bcrypt');
+const { ensureOrderSchema } = require('./orderService');
 
 const run = (db, sql, params = []) => new Promise((resolve, reject) => {
   db.run(sql, params, function(error) {
@@ -89,6 +90,7 @@ const initializeDatabase = async (db, options = {}) => {
   await run(db, 'BEGIN TRANSACTION');
   try {
     await ensureSchema(db);
+    await ensureOrderSchema(db);
     if (options.failAfterSchema) throw new Error('Initialization test failure');
     await seedProducts(db);
     await seedUsers(db);
