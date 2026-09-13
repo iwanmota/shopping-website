@@ -1,11 +1,11 @@
 import React from 'react';
+import { vi } from 'vitest';
 import { render, waitFor } from '@testing-library/react';
+
+vi.mock('../services/api', () => ({ apiRequest: vi.fn() }));
+
 import { AuthProvider, useAuth } from './AuthContext';
 import { apiRequest } from '../services/api';
-
-jest.mock('../services/api', () => ({
-  apiRequest: jest.fn()
-}));
 
 const StateProbe = ({ onState }) => {
   const state = useAuth();
@@ -13,10 +13,15 @@ const StateProbe = ({ onState }) => {
   return null;
 };
 
+afterEach(() => {
+  localStorage.clear();
+  vi.clearAllMocks();
+});
+
 test('validates a saved token with /api/auth/me instead of trusting saved user data', async () => {
   localStorage.setItem('auth_token', 'saved-token');
   apiRequest.mockResolvedValue({ id: 1, email: 'server@example.com', role: 'customer' });
-  const onState = jest.fn();
+  const onState = vi.fn();
 
   render(<AuthProvider><StateProbe onState={onState} /></AuthProvider>);
 
@@ -30,7 +35,7 @@ test('validates a saved token with /api/auth/me instead of trusting saved user d
 test('clears an invalid saved token', async () => {
   localStorage.setItem('auth_token', 'expired-token');
   apiRequest.mockRejectedValue({ status: 401 });
-  const onState = jest.fn();
+  const onState = vi.fn();
 
   render(<AuthProvider><StateProbe onState={onState} /></AuthProvider>);
 

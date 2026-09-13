@@ -1,7 +1,9 @@
+import { vi } from 'vitest';
+
+vi.mock('./api', () => ({ apiRequest: vi.fn() }));
+
 import { getOrder, getOrders } from './orders';
 import { apiRequest } from './api';
-
-jest.mock('./api', () => ({ apiRequest: jest.fn() }));
 
 test('requests the authenticated customer order history', async () => {
   apiRequest.mockResolvedValue([{ id: 4 }]);

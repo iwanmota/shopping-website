@@ -18,7 +18,12 @@ This is a shopping website that allows users to browse products, manage a shoppi
    git clone <repository-url>
    ```
 
-2. Navigate to the project directory:
+2. Use Node.js 20.19.0 or newer:
+   ```
+   node --version
+   ```
+
+3. Navigate to the project directory:
    ```
    cd shopping-website
    ```
@@ -56,11 +61,19 @@ This is a shopping website that allows users to browse products, manage a shoppi
    ```
    This deletes and recreates the local database.
 
-8. In a new terminal, start the frontend:
+8. In a new terminal, start the Vite frontend:
    ```
    npm start
    ```
-   The app will run on http://localhost:3000
+   The app will run on http://localhost:5173.
+
+   To point the frontend at a different API origin, copy `.env.example` to `.env` and set `VITE_API_URL`.
+
+   Run the frontend verification commands with:
+   ```
+   npm test
+   npm run build
+   ```
 
    The `db:init` command is safe to repeat; use `db:reset` only when you want to discard local data.
 
@@ -130,9 +143,9 @@ To reset the database:
 ```
 shopping-website/
 ├── .kiro/                  # Kiro specs and configuration
+├── index.html              # Vite HTML entry point
 ├── public/                 # Static assets
-│   ├── images/             # Product images
-│   └── index.html          # HTML template
+│   └── images/             # Product images
 ├── server/                 # Backend server
 │   ├── middleware/         # Express middleware
 │   ├── routes/             # API routes
@@ -145,7 +158,7 @@ shopping-website/
 │   ├── context/            # React context providers
 │   ├── styles/             # CSS styles
 │   ├── App.jsx             # Main application component
-│   └── index.js            # Application entry point
+│   └── main.jsx            # Vite application entry point
 └── package.json            # Frontend dependencies
 ```
 

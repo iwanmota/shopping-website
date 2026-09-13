@@ -1,3 +1,4 @@
+import { vi } from 'vitest';
 import { apiRequest, getApiUrl } from './api';
 
 test('builds API URLs from the configured base URL', () => {
@@ -5,7 +6,7 @@ test('builds API URLs from the configured base URL', () => {
 });
 
 test('parses JSON responses and adds the authorization header', async () => {
-  const fetchMock = jest.fn().mockResolvedValue({
+  const fetchMock = vi.fn().mockResolvedValue({
     ok: true,
     headers: { get: () => 'application/json' },
     json: async () => ({ products: [] })
@@ -19,7 +20,7 @@ test('parses JSON responses and adds the authorization header', async () => {
 });
 
 test('returns a useful error for non-JSON server responses', async () => {
-  const fetchMock = jest.fn().mockResolvedValue({
+  const fetchMock = vi.fn().mockResolvedValue({
     ok: false,
     status: 502,
     headers: { get: () => 'text/html' }
@@ -30,7 +31,7 @@ test('returns a useful error for non-JSON server responses', async () => {
 });
 
 test('uses the server error from a JSON response', async () => {
-  const fetchMock = jest.fn().mockResolvedValue({
+  const fetchMock = vi.fn().mockResolvedValue({
     ok: false,
     status: 401,
     headers: { get: () => 'application/json' },

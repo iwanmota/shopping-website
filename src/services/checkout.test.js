@@ -1,13 +1,15 @@
-jest.mock('./api', () => ({ apiRequest: jest.fn() }));
+import { vi } from 'vitest';
+
+vi.mock('./api', () => ({ apiRequest: vi.fn() }));
 
 import { checkout } from './checkout';
 import { apiRequest } from './api';
 
-beforeEach(() => jest.clearAllMocks());
+beforeEach(() => vi.clearAllMocks());
 
 test('submits only product identity, quantity, and pricing tier with authentication', async () => {
   apiRequest.mockResolvedValue({ receipt: { id: 'local-1' } });
-  const fetchMock = jest.fn();
+  const fetchMock = vi.fn();
   const items = [{ id: 1, quantity: 2, pricingTier: 'sale', price: 0.01, name: 'Ignored' }];
 
   const receipt = await checkout(items, 'token-123', fetchMock);
@@ -23,5 +25,5 @@ test('submits only product identity, quantity, and pricing tier with authenticat
 
 test('propagates the server checkout error', async () => {
   apiRequest.mockRejectedValue(new Error('Not enough inventory'));
-  await expect(checkout([], 'token-123', jest.fn())).rejects.toThrow('Not enough inventory');
+  await expect(checkout([], 'token-123', vi.fn())).rejects.toThrow('Not enough inventory');
 });
