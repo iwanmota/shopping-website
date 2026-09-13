@@ -22,6 +22,7 @@ import ProtectedRoute, { AdminRoute } from './components/ProtectedRoute';
 import './styles/main.css';
 import { CartProvider } from './context/CartContext';
 import { AuthProvider } from './context/AuthContext';
+import { apiRequest } from './services/api';
 
 const App = () => {
     // State for product data and loading status
@@ -43,11 +44,7 @@ const App = () => {
     const fetchProducts = () => {
         setLoading(true);
         setError(null);
-        fetch('http://localhost:3001/api/products')
-            .then(response => {
-                if (!response.ok) throw new Error('Unable to load products');
-                return response.json();
-            })
+        apiRequest('/api/products')
             .then(data => {
                 setProducts(data);
                 setLoading(false);

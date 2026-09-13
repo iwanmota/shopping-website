@@ -1,46 +1,27 @@
+jest.mock('./api', () => ({ apiRequest: jest.fn() }));
+
 import { checkout } from './checkout';
+import { apiRequest } from './api';
+
+beforeEach(() => jest.clearAllMocks());
 
 test('submits only product identity, quantity, and pricing tier with authentication', async () => {
-  const fetchMock = jest.fn().mockResolvedValue({
-    ok: true,
-    headers: { get: () => 'application/json' },
-    json: async () => ({ receipt: { id: 'local-1' } })
-  });
+  apiRequest.mockResolvedValue({ receipt: { id: 'local-1' } });
+  const fetchMock = jest.fn();
   const items = [{ id: 1, quantity: 2, pricingTier: 'sale', price: 0.01, name: 'Ignored' }];
 
   const receipt = await checkout(items, 'token-123', fetchMock);
 
-  expect(fetchMock).toHaveBeenCalledWith('http://localhost:3001/api/checkout', {
+  expect(apiRequest).toHaveBeenCalledWith('/api/checkout', {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: 'Bearer token-123'
-    },
-    body: JSON.stringify({
-      items: [{ productId: 1, quantity: 2, pricingTier: 'sale' }]
-    })
+    token: 'token-123',
+    fetchImplementation: fetchMock,
+    body: { items: [{ productId: 1, quantity: 2, pricingTier: 'sale' }] }
   });
   expect(receipt).toEqual({ id: 'local-1' });
 });
 
-test('throws the server checkout error', async () => {
-  const fetchMock = jest.fn().mockResolvedValue({
-    ok: false,
-    headers: { get: () => 'application/json' },
-    json: async () => ({ error: 'Not enough inventory' })
-  });
-
-  await expect(checkout([], 'token-123', fetchMock)).rejects.toThrow('Not enough inventory');
-});
-
-test('explains when the running backend does not have the checkout route', async () => {
-  const fetchMock = jest.fn().mockResolvedValue({
-    ok: false,
-    status: 404,
-    headers: { get: () => 'text/html' }
-  });
-
-  await expect(checkout([], 'token-123', fetchMock)).rejects.toThrow(
-    'Checkout endpoint is unavailable. Restart the backend server.'
-  );
+test('propagates the server checkout error', async () => {
+  apiRequest.mockRejectedValue(new Error('Not enough inventory'));
+  await expect(checkout([], 'token-123', jest.fn())).rejects.toThrow('Not enough inventory');
 });

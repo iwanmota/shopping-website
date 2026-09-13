@@ -10,6 +10,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import './Homepage.css';
+import { apiRequest } from '../services/api';
 
 /**
  * Homepage component displaying featured sale products
@@ -33,8 +34,7 @@ const Homepage = ({ showToast }) => {
      * Retrieves only products that are on sale and have available sale quantity
      */
     useEffect(() => {
-        fetch('http://localhost:3001/api/products/sale')
-            .then(response => response.json())
+        apiRequest('/api/products/sale')
             .then(data => {
                 setSaleProducts(data);
                 setLoading(false);
