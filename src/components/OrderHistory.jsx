@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { getOrder, getOrders } from '../services/orders';
+import { parseServerDate } from '../services/dates';
 import './OrderHistory.css';
 
 const formatCurrency = amount => `$${Number(amount).toFixed(2)}`;
@@ -45,7 +46,7 @@ const OrderHistory = () => {
               <li key={order.id}>
                 <button className={selectedOrder?.id === order.id ? 'order-row selected' : 'order-row'} onClick={() => viewOrder(order.id)}>
                   <span>Order #{order.id}</span>
-                  <span>{new Date(order.createdAt).toLocaleDateString()}</span>
+                  <span>{parseServerDate(order.createdAt).toLocaleDateString()}</span>
                   <strong>{formatCurrency(order.total)}</strong>
                 </button>
               </li>
@@ -55,7 +56,7 @@ const OrderHistory = () => {
             <section className="order-detail" aria-live="polite">
               <p className="eyebrow">Order #{selectedOrder.id}</p>
               <h2>{selectedOrder.status}</h2>
-              <p>{new Date(selectedOrder.createdAt).toLocaleString()}</p>
+              <p>{parseServerDate(selectedOrder.createdAt).toLocaleString()}</p>
               <ul>
                 {selectedOrder.items.map(item => (
                   <li key={`${item.productId}-${item.pricingTier}`}>
