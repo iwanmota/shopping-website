@@ -8,6 +8,7 @@
  * It also handles special logic for sale items with limited quantities.
  */
 import React, { createContext, useContext, useReducer } from 'react';
+import { getInventoryForTier, reconcileCartItems } from './cartInventory';
 
 // Create context for cart state
 const CartContext = createContext();
@@ -43,15 +44,15 @@ export const cartReducer = (state, action) => {
                         );
                     } else {
                         // Sale quantity exceeded, add as regular item
-                        if (existingRegularItem) {
+                        if (existingRegularItem && existingRegularItem.quantity < getInventoryForTier(action.payload, 'regular')) {
                             // Regular version already in cart, increment quantity
                             updatedState = state.map(item =>
                                 item.lineId === `${id}-regular`
                                     ? { ...item, quantity: item.quantity + 1 }
                                     : item
                             );
-                        } else {
-                            // Add new regular item
+                        } else if (getInventoryForTier(action.payload, 'regular') > 0) {
+                            // Add new regular item only when regular stock exists
                             updatedState.push({ ...action.payload, lineId: `${id}-regular`, pricingTier: 'regular', isOnSale: false, price, quantity: 1 });
                         }
                     }
@@ -61,15 +62,15 @@ export const cartReducer = (state, action) => {
                 }
             } else {
                 // Handle regular item (not on sale or sale quantity depleted)
-                if (existingRegularItem) {
+                if (existingRegularItem && existingRegularItem.quantity < getInventoryForTier(action.payload, 'regular')) {
                     // Regular item already in cart, increment quantity
                     updatedState = state.map(item =>
                         item.lineId === `${id}-regular`
                             ? { ...item, quantity: item.quantity + 1 }
                             : item
                     );
-                } else {
-                    // Add new regular item
+                } else if (getInventoryForTier(action.payload, 'regular') > 0) {
+                    // Add new regular item only when regular stock exists
                     updatedState.push({ ...action.payload, lineId: `${id}-regular`, pricingTier: 'regular', isOnSale: false, quantity: 1 });
                 }
             }
@@ -81,17 +82,22 @@ export const cartReducer = (state, action) => {
             // Remove all instances of an item from cart by ID
             return state.filter(item => item.lineId !== action.payload);
 
-        case 'UPDATE_QUANTITY':
+        case 'UPDATE_QUANTITY': {
             // Update quantity for a specific item
-            return state.map(item =>
-                item.lineId === action.payload.lineId
-                    ? { ...item, quantity: action.payload.quantity }
-                    : item
+            const item = state.find(candidate => candidate.lineId === action.payload.lineId);
+            if (!item) return state;
+            const quantity = Math.min(action.payload.quantity, getInventoryForTier(item, item.pricingTier));
+            return quantity < 1 ? state.filter(candidate => candidate.lineId !== item.lineId) : state.map(candidate =>
+                candidate.lineId === item.lineId ? { ...candidate, quantity } : candidate
             );
+        }
 
         case 'CLEAR_CART':
             // Empty the cart completely
             return [];
+
+        case 'RECONCILE_INVENTORY':
+            return reconcileCartItems(state, action.payload);
 
         default:
             return state;
@@ -151,6 +157,8 @@ export const CartProvider = ({ children }) => {
         dispatch({ type: 'CLEAR_CART' });
     };
 
+    const reconcileInventory = products => dispatch({ type: 'RECONCILE_INVENTORY', payload: products });
+
     /**
      * Calculate total price of all items in cart
      */
@@ -166,7 +174,8 @@ export const CartProvider = ({ children }) => {
             removeFromCart,
             updateQuantity,
             clearCart,
-            cartTotal
+            cartTotal,
+            reconcileInventory
         }}>
             {children}
         </CartContext.Provider>

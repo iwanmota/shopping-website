@@ -29,10 +29,14 @@ import './ProductCard.css';
  */
 const ProductCard = ({ product, onImageClick, showToast }) => {
     // Get cart functionality from context
-    const { addToCart } = useCart();
+    const { addToCart, cartItems } = useCart();
     
     // Determine if product is currently on sale with available quantity
     const isOnSale = Boolean(product.isOnSale && product.onSaleQuantity > 0);
+    const saleInCart = cartItems.find(item => item.lineId === `${product.id}-sale`)?.quantity || 0;
+    const regularInCart = cartItems.find(item => item.lineId === `${product.id}-regular`)?.quantity || 0;
+    const hasStock = saleInCart < (Number(product.onSaleQuantity) || 0)
+        || regularInCart < (Number(product.regularInventory) || 0);
     
     /**
      * Calculate percentage discount between original and sale price
@@ -94,8 +98,9 @@ const ProductCard = ({ product, onImageClick, showToast }) => {
             <button 
                 className="add-to-cart-button"
                 onClick={handleAddToCart}
+                disabled={!hasStock}
             >
-                Add to Cart
+                {hasStock ? 'Add to Cart' : 'Out of Stock'}
             </button>
         </div>
     );

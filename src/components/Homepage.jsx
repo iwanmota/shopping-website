@@ -26,7 +26,7 @@ const Homepage = ({ showToast }) => {
     const [error, setError] = useState(null);
     
     // Get cart functionality from context
-    const { addToCart } = useCart();
+    const { addToCart, cartItems } = useCart();
 
     /**
      * Fetch sale products from the API on component mount
@@ -108,6 +108,8 @@ const Homepage = ({ showToast }) => {
                             <button 
                                 className="add-to-cart-button"
                                 onClick={() => handleAddToCart(product)}
+                                disabled={(cartItems.find(item => item.lineId === `${product.id}-sale`)?.quantity || 0) >= (Number(product.onSaleQuantity) || 0)
+                                    && (cartItems.find(item => item.lineId === `${product.id}-regular`)?.quantity || 0) >= (Number(product.regularInventory) || 0)}
                             >
                                 Add to Cart <i className="fas fa-shopping-cart"></i>
                             </button>
