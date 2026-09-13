@@ -19,7 +19,7 @@ This document provides detailed information for developers who want to contribut
 
 ### Prerequisites
 
-- Node.js (v16 or higher)
+- Node.js (v20.19.0 or higher)
 - npm (v8 or higher)
 - Git
 
@@ -45,14 +45,14 @@ This document provides detailed information for developers who want to contribut
 
 4. Initialize the database:
    ```bash
-   node server/initDb.js
+   cd server && npm run db:init && cd ..
    ```
 
 5. Start the development servers:
    
    In one terminal (backend):
    ```bash
-   node server/server.js
+   cd server && JWT_SECRET=local-development-secret npm start
    ```
    
    In another terminal (frontend):
@@ -64,7 +64,7 @@ This document provides detailed information for developers who want to contribut
 
 The application uses the following environment variables that can be set in a `.env` file:
 
-- `JWT_SECRET`: Secret key for JWT token signing (default: 'your-secret-key-here')
+- `JWT_SECRET`: Secret key for JWT token signing (required outside tests)
 - `PORT`: Backend server port (default: 3001)
 - `NODE_ENV`: Environment mode (development, production, test)
 
