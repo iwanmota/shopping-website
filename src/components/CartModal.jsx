@@ -23,12 +23,39 @@ import './CartModal.css';
 const CartModal = ({ isOpen, onClose, onCheckoutSuccess }) => {
     // Get cart state and functions from context
     const { cartItems, removeFromCart, updateQuantity, clearCart, cartTotal } = useCart();
+    const [receipt, setReceipt] = useState(null);
     const { isAuthenticated, token } = useAuth();
     const [checkoutError, setCheckoutError] = useState('');
     const [checkingOut, setCheckingOut] = useState(false);
 
     // Don't render anything if modal is closed
     if (!isOpen) return null;
+
+    if (receipt) {
+        return (
+            <div className="modal-overlay" onClick={onClose}>
+                <div className="modal-content" role="dialog" aria-modal="true" aria-labelledby="receipt-title" onClick={event => event.stopPropagation()}>
+                    <div className="modal-header">
+                        <h2 id="receipt-title">Checkout complete</h2>
+                        <button className="close-button" onClick={onClose} aria-label="Close receipt">×</button>
+                    </div>
+                    <div className="receipt-content" role="status">
+                        <p>Receipt: {receipt.id}</p>
+                        <p>Purchased {new Date(receipt.purchasedAt).toLocaleString()}</p>
+                        <ul>
+                            {receipt.items.map(item => (
+                                <li key={`${item.productId}-${item.pricingTier}`}>
+                                    {item.name} — {item.quantity} × ${Number(item.unitPrice).toFixed(2)} = ${Number(item.subtotal).toFixed(2)}
+                                </li>
+                            ))}
+                        </ul>
+                        <strong>Total: ${Number(receipt.total).toFixed(2)}</strong>
+                    </div>
+                    <button className="checkout-button" onClick={() => setReceipt(null)}>Continue shopping</button>
+                </div>
+            </div>
+        );
+    }
 
     /**
      * Format price to display with 2 decimal places
@@ -47,9 +74,10 @@ const CartModal = ({ isOpen, onClose, onCheckoutSuccess }) => {
         setCheckoutError('');
         setCheckingOut(true);
         try {
-            const receipt = await checkout(cartItems, token);
+            const completedReceipt = await checkout(cartItems, token);
             clearCart();
-            onCheckoutSuccess(receipt);
+            setReceipt(completedReceipt);
+            onCheckoutSuccess?.(completedReceipt);
         } catch (error) {
             setCheckoutError(error.message);
         } finally {

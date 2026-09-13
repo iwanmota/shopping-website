@@ -141,7 +141,6 @@ const App = () => {
                             isOpen={isCartOpen} 
                             onClose={() => setIsCartOpen(false)}
                             onCheckoutSuccess={() => {
-                                setIsCartOpen(false);
                                 fetchProducts();
                                 showToast('Checkout successful');
                             }}

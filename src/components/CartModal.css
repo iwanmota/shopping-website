@@ -47,6 +47,9 @@
 .checkout-button { width: 100%; min-height: 52px; border: 1px solid var(--accent); background: var(--accent); color: var(--ink); cursor: pointer; }
 .checkout-button:hover:not(:disabled) { background: transparent; color: var(--text-bright); }
 .checkout-button:disabled { opacity: .45; cursor: not-allowed; }
+.receipt-content { color: var(--text-bright); line-height: 1.7; }
+.receipt-content ul { padding-left: 1.25rem; color: var(--muted); }
+.receipt-content strong { display: block; margin-top: 1rem; color: var(--text-bright); font-size: 1.2rem; }
 .checkout-error { margin: 0 0 1rem; color: var(--danger); text-align: center; }
 .empty-cart { padding: 4rem 1rem; color: var(--muted); text-align: center; }
 @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
