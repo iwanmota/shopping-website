@@ -127,19 +127,23 @@ app.use('/api/checkout', checkoutRoutes);
 // Register authentication error handler
 app.use(authErrorHandler);
 
-// Set up server port and start listening
-const PORT = process.env.PORT || 3001;
-
-// Initialize file storage before starting the server
-(async () => {
+const startServer = async (port = process.env.PORT || 3001) => {
     try {
         await initFileStorage();
         await ensureProductInventorySchema(db);
-        app.listen(PORT, () => {
-            console.log(`Server running on port ${PORT}`);
+        return app.listen(port, () => {
+            console.log(`Server running on port ${port}`);
         });
     } catch (error) {
-        console.error('Failed to initialize server:', error);
-        process.exit(1);
+        throw new Error(`Failed to initialize server: ${error.message}`, { cause: error });
     }
-})();
+};
+
+if (require.main === module) {
+    startServer().catch(error => {
+        console.error(error.message);
+        process.exit(1);
+    });
+}
+
+module.exports = { app, db, startServer };

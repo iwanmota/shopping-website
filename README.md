@@ -35,23 +35,34 @@ This is a shopping website that allows users to browse products, manage a shoppi
    cd ..
    ```
 
-5. Initialize the SQLite database:
+5. Initialize the database:
    ```
-   node server/initDb.js
+   cd server
+   npm run db:init
+   cd ..
    ```
-   This creates a `shopping.db` file with sample data defined in `server/initDb.js`
+   This is safe to run repeatedly and does not duplicate sample records.
 
-6. Start the backend server with a local JWT secret:
+7. Start the backend server with a local JWT secret:
    ```
-   JWT_SECRET=local-development-secret node server/server.js
+   cd server
+   JWT_SECRET=local-development-secret npm start
    ```
    The server will run on http://localhost:3001
 
-7. In a new terminal, start the frontend development server:
+   To intentionally reset the local database:
+   ```
+   npm run db:reset
+   ```
+   This deletes and recreates the local database.
+
+8. In a new terminal, start the frontend:
    ```
    npm start
    ```
    The app will run on http://localhost:3000
+
+   The `db:init` command is safe to repeat; use `db:reset` only when you want to discard local data.
 
 ## Authentication System
 
@@ -81,8 +92,10 @@ The system is initialized with two default users:
 ## Database Information
 
 - Database: SQLite3
-- Database file: `server/shopping.db` (created automatically)
-- Initial data: Defined in `server/initDb.js`
+- Database file: `shopping.db` at the repository root
+- Initialize safely with `cd server && npm run db:init`
+- Reset intentionally with `cd server && npm run db:reset`
+- Initial data: Defined in `server/services/databaseInitializer.js`
 
 ### Products Table
 ```javascript

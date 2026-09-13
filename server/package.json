@@ -5,7 +5,9 @@
   "scripts": {
     "test": "jest",
     "test:watch": "jest --watch",
-    "start": "node server.js"
+    "start": "node server.js",
+    "db:init": "node initDb.js",
+    "db:reset": "node resetDb.js"
   },
   "keywords": [],
   "author": "",
@@ -21,6 +23,7 @@
   },
   "description": "",
   "devDependencies": {
-    "jest": "^30.0.5"
+    "jest": "^30.0.5",
+    "supertest": "^7.2.2"
   }
 }
