@@ -36,22 +36,22 @@ This is a shopping website that allows users to browse products, manage a shoppi
    ```
 
 5. Initialize the SQLite database:
-   ```
+   ```bash
    node server/initDb.js
    ```
-   This creates a `shopping.db` file with sample data defined in `server/initDb.js`
+   This creates a `shopping.db` file at the repository root with sample data defined in `server/initDb.js`.
 
 6. Start the backend server with a local JWT secret:
-   ```
+   ```bash
    JWT_SECRET=local-development-secret node server/server.js
    ```
    The server will run on http://localhost:3001
 
-7. In a new terminal, start the frontend development server:
-   ```
+7. In a new terminal, start the Vite frontend development server:
+   ```bash
    npm start
    ```
-   The app will run on http://localhost:3000
+   The app will run on http://localhost:5173
 
 ## Authentication System
 
@@ -81,7 +81,7 @@ The system is initialized with two default users:
 ## Database Information
 
 - Database: SQLite3
-- Database file: `server/shopping.db` (created automatically)
+- Database file: `shopping.db` at the repository root (created by `server/initDb.js`)
 - Initial data: Defined in `server/initDb.js`
 
 ### Products Table
@@ -109,7 +109,7 @@ The database includes a users table for authentication with the following schema
 - updatedAt: Timestamp when the user was last updated
 
 To reset the database:
-1. Delete `server/shopping.db`
+1. Delete `shopping.db`
 2. Run `node server/initDb.js` again
 
 ## Project Structure
@@ -118,8 +118,8 @@ To reset the database:
 shopping-website/
 ├── .kiro/                  # Kiro specs and configuration
 ├── public/                 # Static assets
-│   ├── images/             # Product images
-│   └── index.html          # HTML template
+│   └── images/             # Product images
+├── index.html              # Vite HTML entry point
 ├── server/                 # Backend server
 │   ├── middleware/         # Express middleware
 │   ├── routes/             # API routes
@@ -132,7 +132,7 @@ shopping-website/
 │   ├── context/            # React context providers
 │   ├── styles/             # CSS styles
 │   ├── App.jsx             # Main application component
-│   └── index.js            # Application entry point
+│   └── main.jsx            # Vite application entry point
 └── package.json            # Frontend dependencies
 ```
 

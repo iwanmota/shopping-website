@@ -19,7 +19,7 @@ This document provides detailed information for developers who want to contribut
 
 ### Prerequisites
 
-- Node.js (v16 or higher)
+- Node.js (v20.19.0 or higher)
 - npm (v8 or higher)
 - Git
 
@@ -47,15 +47,16 @@ This document provides detailed information for developers who want to contribut
    ```bash
    node server/initDb.js
    ```
+   This creates `shopping.db` at the repository root.
 
 5. Start the development servers:
    
    In one terminal (backend):
    ```bash
-   node server/server.js
+   JWT_SECRET=local-development-secret node server/server.js
    ```
    
-   In another terminal (frontend):
+   In another terminal (frontend, served by Vite at http://localhost:5173):
    ```bash
    npm start
    ```
@@ -117,10 +118,10 @@ src/
 │   ├── AuthContext.jsx # Authentication context
 │   ├── CartContext.jsx # Shopping cart context
 │   └── ...
-├── styles/             # Global styles
-│   └── main.css        # Main stylesheet
-├── App.jsx             # Main application component
-└── index.js            # Application entry point
+│   ├── styles/             # Global styles
+│   │   └── main.css        # Main stylesheet
+│   ├── App.jsx             # Main application component
+│   └── main.jsx            # Vite application entry point
 ```
 
 ### Backend Structure
@@ -496,7 +497,7 @@ Example: `feat: add user authentication system`
 
 If you encounter issues with database initialization:
 
-1. Delete the existing `server/shopping.db` file
+1. Delete the existing `shopping.db` file
 2. Run `node server/initDb.js` again
 3. Check for error messages in the console
 
