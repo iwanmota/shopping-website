@@ -20,6 +20,7 @@ import ImageModal from './components/ImageModal';
 import Toast from './components/Toast';
 import OrderHistory from './components/OrderHistory';
 import AdminDashboard from './components/AdminDashboard';
+import ProfilePage from './components/ProfilePage';
 import ProtectedRoute, { AdminRoute } from './components/ProtectedRoute';
 import './styles/main.css';
 import { CartProvider } from './context/CartContext';
@@ -124,10 +125,7 @@ const App = () => {
                             } />
                             <Route path="/profile" element={
                                 <ProtectedRoute>
-                                    <div className="profile-page">
-                                        <h1>User Profile</h1>
-                                        <p>This is a protected page. Only authenticated users can access it.</p>
-                                    </div>
+                                    <ProfilePage />
                                 </ProtectedRoute>
                             } />
                             <Route path="/unauthorized" element={

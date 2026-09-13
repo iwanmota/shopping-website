@@ -229,5 +229,39 @@ router.get('/me', authenticateToken, (req, res) => {
     res.json(userData);
   });
 });
+router.put('/me', authenticateToken, (req, res) => {
+  const { firstName, lastName } = req.body;
+  if ((firstName !== undefined && typeof firstName !== 'string')
+    || (lastName !== undefined && typeof lastName !== 'string')) {
+    return res.status(400).json({ error: 'Names must be strings' });
+  }
+
+  const updates = [];
+  const values = [];
+  if (firstName !== undefined) {
+    updates.push('firstName = ?');
+    values.push(firstName.trim() || null);
+  }
+  if (lastName !== undefined) {
+    updates.push('lastName = ?');
+    values.push(lastName.trim() || null);
+  }
+  if (updates.length === 0) {
+    return res.status(400).json({ error: 'At least one profile field is required' });
+  }
+
+  updates.push('updatedAt = CURRENT_TIMESTAMP');
+  values.push(req.user.id);
+  db.run(`UPDATE users SET ${updates.join(', ')} WHERE id = ?`, values, function(err) {
+    if (err) return res.status(500).json({ error: 'Database error' });
+    if (this.changes !== 1) return res.status(404).json({ error: 'User not found' });
+
+    db.get('SELECT id, email, firstName, lastName, role, createdAt, updatedAt FROM users WHERE id = ?',
+      [req.user.id], (selectError, user) => {
+        if (selectError) return res.status(500).json({ error: 'Database error' });
+        res.json(user);
+      });
+  });
+});
 
 module.exports = router;

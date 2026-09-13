@@ -91,4 +91,23 @@ describe('API integration', () => {
     expect((await api(`/api/orders/${receipt.id}`, { headers: { Authorization: `Bearer ${admin.token}` } })).status).toBe(404);
     expect((await api('/api/orders/1abc', { headers: { Authorization: `Bearer ${customer.token}` } })).status).toBe(400);
   });
+
+  test('allows an authenticated customer to update their own profile', async () => {
+    const customer = await login('customer@example.com');
+    const updateResponse = await api('/api/auth/me', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${customer.token}` },
+      body: JSON.stringify({ firstName: 'Updated', lastName: 'Customer' })
+    });
+
+    expect(updateResponse.status).toBe(200);
+    expect(await updateResponse.json()).toEqual(expect.objectContaining({
+      email: 'customer@example.com', firstName: 'Updated', lastName: 'Customer', role: 'customer'
+    }));
+
+    const profileResponse = await api('/api/auth/me', {
+      headers: { Authorization: `Bearer ${customer.token}` }
+    });
+    expect((await profileResponse.json()).firstName).toBe('Updated');
+  });
 });

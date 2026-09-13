@@ -1,0 +1,15 @@
+.profile-dashboard { width: min(760px, calc(100% - 3rem)); margin: 4rem auto 6rem; }
+.profile-heading { margin-bottom: 2rem; }
+.profile-heading h1 { margin: 0 0 .75rem; color: var(--text-bright); font: 300 clamp(2.4rem, 6vw, 5rem)/1 'Montserrat', sans-serif; }
+.profile-heading p:last-child { color: var(--muted); }
+.profile-form { display: grid; gap: 1rem; padding: clamp(1.25rem, 4vw, 3rem); border: 1px solid var(--line); background: rgba(13, 32, 43, .82); }
+.profile-form label { display: grid; gap: .45rem; color: var(--muted); font-size: .82rem; }
+.profile-form input { width: 100%; border: 1px solid var(--line); padding: .8rem; background: var(--ink); color: var(--text-bright); }
+.profile-form input[readonly] { color: var(--muted); }
+.profile-form button { min-height: 46px; border: 1px solid var(--accent); background: var(--accent); color: var(--ink); cursor: pointer; }
+.profile-form button:disabled { cursor: wait; opacity: .5; }
+.profile-role { margin: 0; color: var(--muted); font-size: .85rem; }
+.profile-role strong { color: var(--text-bright); }
+.profile-feedback { margin: 0 0 1rem; padding: .8rem 1rem; border: 1px solid var(--success); color: var(--success); }
+.profile-feedback.error { border-color: var(--danger); color: var(--danger); }
+@media (max-width: 600px) { .profile-dashboard { width: min(100% - 2rem, 560px); margin-top: 2rem; } }
