@@ -1,7 +1,8 @@
+import { vi } from 'vitest';
 import { checkout } from './checkout';
 
 test('submits only product identity, quantity, and pricing tier with authentication', async () => {
-  const fetchMock = jest.fn().mockResolvedValue({
+  const fetchMock = vi.fn().mockResolvedValue({
     ok: true,
     headers: { get: () => 'application/json' },
     json: async () => ({ receipt: { id: 'local-1' } })
@@ -24,7 +25,7 @@ test('submits only product identity, quantity, and pricing tier with authenticat
 });
 
 test('throws the server checkout error', async () => {
-  const fetchMock = jest.fn().mockResolvedValue({
+  const fetchMock = vi.fn().mockResolvedValue({
     ok: false,
     headers: { get: () => 'application/json' },
     json: async () => ({ error: 'Not enough inventory' })
@@ -34,7 +35,7 @@ test('throws the server checkout error', async () => {
 });
 
 test('explains when the running backend does not have the checkout route', async () => {
-  const fetchMock = jest.fn().mockResolvedValue({
+  const fetchMock = vi.fn().mockResolvedValue({
     ok: false,
     status: 404,
     headers: { get: () => 'text/html' }
