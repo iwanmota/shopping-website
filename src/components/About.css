@@ -1,33 +1,33 @@
 .about-container {
   width: min(1320px, calc(100% - 2rem));
   margin: 0 auto;
-  padding: clamp(3rem, 7vw, 7rem) 0;
+  padding: 28px 24px;
 }
-.about-header { margin-bottom: 4rem; border-bottom: 1px solid var(--line); padding-bottom: 2rem; }
+.about-header { margin-bottom: 24px; border-bottom: 1px solid var(--line); padding-bottom: 20px; }
 .about-header h1 {
   max-width: 900px;
   margin: 0;
   color: var(--text-bright);
-  font: 200 clamp(3rem, 8vw, 7rem)/.98 'Montserrat', sans-serif;
+  font: 400 clamp(2rem, 5vw, 3.5rem)/1.1 Georgia, serif;
   letter-spacing: -.045em;
 }
 .decorative-line { width: 9rem; height: 1px; margin-top: 2rem; background: var(--accent); }
-.about-content { display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); gap: clamp(2rem, 6vw, 6rem); align-items: start; }
+.about-content { display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); gap: 28px; align-items: start; }
 .about-image { position: sticky; top: 7rem; aspect-ratio: 16 / 9; overflow: hidden; border: 1px solid var(--line); }
-.about-image img { width: 100%; height: 100%; display: block; object-fit: cover; object-position: center; filter: saturate(.65) contrast(1.08); }
+.about-image img { width: 100%; height: 100%; display: block; object-fit: cover; object-position: center;  }
 .about-text { color: var(--muted); }
 .about-text > h2, .about-cta h2 {
   margin: 0 0 1.5rem;
   color: var(--text-bright);
-  font: 300 clamp(2rem, 4vw, 3.5rem)/1 'Montserrat', sans-serif;
+  font: 300 clamp(2rem, 4vw, 3.5rem)/1 Georgia, serif;
 }
 .about-text > p, .about-cta p { font-size: 1.02rem; line-height: 1.9; }
-.values-grid { display: grid; grid-template-columns: 1fr 1fr; margin: 3rem 0; border-top: 1px solid var(--line); border-left: 1px solid var(--line); }
-.value-card { min-height: 190px; padding: 1.5rem; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.values-grid { display: grid; grid-template-columns: 1fr 1fr; margin: 24px 0; border-top: 1px solid var(--line); border-left: 1px solid var(--line); }
+.value-card { min-height: 150px; padding: 1.5rem; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); }
 .value-card i { color: var(--accent); font-size: 1rem; }
-.value-card h3 { margin: 2rem 0 .65rem; color: var(--text-bright); font: 400 1rem 'Montserrat', sans-serif; }
+.value-card h3 { margin: 12px 0 8px; color: var(--text-bright); font: 400 1rem Georgia, serif; }
 .value-card p { margin: 0; color: var(--muted); font-size: .88rem; line-height: 1.65; }
-.about-cta { margin-top: 4rem; padding-top: 3rem; border-top: 1px solid var(--line); }
+.about-cta { margin-top: 24px; padding-top: 24px; border-top: 1px solid var(--line); }
 .learn-more-btn {
   min-height: 48px;
   margin-top: 1rem;
@@ -44,3 +44,7 @@
   .about-image img { min-height: 0; }
 }
 @media (max-width: 520px) { .values-grid { grid-template-columns: 1fr; } }
+
+@media(max-width:600px) { .about-container { width: 100%; padding: 20px 16px; } .about-text>h2, .about-cta h2 { font-size: 28px; } }
+
+.learn-more-btn { display: inline-flex; align-items: center; gap: 16px; text-decoration: none; }

@@ -11,6 +11,7 @@ import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { checkout } from '../services/checkout';
 import './CartModal.css';
+import useModalFocus from '../hooks/useModalFocus';
 
 /**
  * CartModal component for displaying and managing cart contents
@@ -26,6 +27,8 @@ const CartModal = ({ isOpen, onClose, onCheckoutSuccess }) => {
     const { isAuthenticated, token } = useAuth();
     const [checkoutError, setCheckoutError] = useState('');
     const [checkingOut, setCheckingOut] = useState(false);
+
+    const panel = useModalFocus(isOpen, onClose);
 
     // Don't render anything if modal is closed
     if (!isOpen) return null;
@@ -59,17 +62,17 @@ const CartModal = ({ isOpen, onClose, onCheckoutSuccess }) => {
 
     return (
         <div className="modal-overlay" onClick={onClose}>
-            <div className="modal-content" onClick={e => e.stopPropagation()}>
+            <div className="modal-content" ref={panel} role="dialog" aria-modal="true" aria-labelledby="bag-title" tabIndex={-1} onClick={e => e.stopPropagation()}>
                 <div className="modal-header">
-                    <h2>Shopping Cart</h2>
+                    <h2 id="bag-title">Your shopping bag</h2>
                     <div className="header-actions">
                         {cartItems.length > 0 && (
                             <button className="clear-cart-button" onClick={clearCart}>
                                 Clear Cart
                             </button>
                         )}
-                        <button className="close-button" onClick={onClose}>
-                            <i className="fas fa-times"></i>
+                        <button className="close-button" aria-label="Close shopping bag" onClick={onClose}>
+                            <span aria-hidden="true">×</span>
                         </button>
                     </div>
                 </div>
@@ -100,6 +103,7 @@ const CartModal = ({ isOpen, onClose, onCheckoutSuccess }) => {
                                         {/* Quantity adjustment controls */}
                                         <div className="quantity-controls">
                                             <button 
+                                                aria-label={`Decrease ${item.name} quantity`}
                                                 onClick={() => updateQuantity(item.lineId, item.quantity - 1)}
                                                 disabled={item.quantity <= 1}
                                             >
@@ -107,6 +111,7 @@ const CartModal = ({ isOpen, onClose, onCheckoutSuccess }) => {
                                             </button>
                                             <span>{item.quantity}</span>
                                             <button 
+                                                aria-label={`Increase ${item.name} quantity`}
                                                 onClick={() => updateQuantity(item.lineId, item.quantity + 1)}
                                             >
                                                 +
@@ -115,9 +120,10 @@ const CartModal = ({ isOpen, onClose, onCheckoutSuccess }) => {
                                         {/* Remove item button */}
                                         <button 
                                             className="remove-button"
+                                            aria-label={`Remove ${item.name}`}
                                             onClick={() => removeFromCart(item.lineId)}
                                         >
-                                            <i className="fas fa-trash"></i>
+                                            <span aria-hidden="true">×</span>
                                         </button>
                                     </div>
                                 </li>

@@ -8,6 +8,7 @@
  * @component
  */
 import React from 'react';
+import { Link } from 'react-router-dom';
 import './About.css';
 
 /**
@@ -87,9 +88,9 @@ const About = () => {
                             everyday needs. We're more than just a store – we're your 
                             neighborhood shopping destination.
                         </p>
-                        <button className="learn-more-btn">
-                            Contact Us <i className="fas fa-arrow-right"></i>
-                        </button>
+                        <Link to="/products" className="learn-more-btn">
+                            Explore the collection <span aria-hidden="true">↗</span>
+                        </Link>
                     </div>
                 </div>
             </div>

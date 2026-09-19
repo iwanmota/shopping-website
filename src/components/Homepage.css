@@ -1,109 +1,29 @@
-.homepage-container {
-  width: min(1500px, 100%);
-  margin: 0 auto;
-  padding: clamp(3rem, 8vw, 8rem) 5vw 6rem;
-}
-.sale-banner {
-  position: relative;
-  min-height: 48vh;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  margin-bottom: 5rem;
-  padding: clamp(2rem, 6vw, 6rem);
-  overflow: hidden;
-  border: 1px solid var(--line);
-  background:
-    linear-gradient(115deg, rgba(5, 15, 23, .98) 0%, rgba(10, 31, 41, .94) 52%, rgba(18, 47, 59, .82) 100%),
-    radial-gradient(circle at 82% 34%, rgba(169, 189, 210, .2), transparent 24rem),
-    radial-gradient(circle at 68% 100%, rgba(80, 120, 140, .16), transparent 28rem);
-}
-.sale-banner::after {
-  content: 'CURATED ESSENTIALS / 2026';
-  position: absolute;
-  top: 2rem;
-  right: 2rem;
-  color: var(--muted);
-  font-size: .68rem;
-  letter-spacing: .22em;
-}
-.sale-banner h1 {
-  max-width: 950px;
-  margin: 0;
-  color: var(--text-bright);
-  font: 200 clamp(3.2rem, 9vw, 8.5rem)/.95 'Montserrat', sans-serif;
-  letter-spacing: -.045em;
-}
-.sale-banner h1::after { content: ' for modern living.'; color: var(--accent); }
-.sale-banner p {
-  max-width: 460px;
-  margin: 2rem 0 0;
-  color: var(--muted);
-  font-size: 1.05rem;
-  font-style: italic;
-  line-height: 1.6;
-}
-.sale-products {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 1px;
-  margin-bottom: 3rem;
-  background: var(--line);
-  border: 1px solid var(--line);
-}
-.sale-product-card {
-  position: relative;
-  display: flex;
-  min-width: 0;
-  flex-direction: column;
-  padding: 1.25rem;
-  background: var(--ink-soft);
-  transition: background .25s ease;
-}
-.sale-product-card:hover { background: var(--surface); }
-.sale-product-card .product-image {
-  width: 100%;
-  aspect-ratio: 4 / 3;
-  object-fit: cover;
-  filter: saturate(.72) contrast(1.05);
-}
-.discount-badge {
-  position: absolute;
-  top: 2rem;
-  right: 2rem;
-  z-index: 1;
-  padding: .45rem .65rem;
-  background: var(--text-bright);
-  color: var(--ink);
-  font-size: .68rem;
-  font-weight: 600;
-  letter-spacing: .1em;
-}
-.product-info { display: flex; flex: 1; flex-direction: column; padding-top: 1.25rem; }
-.product-info h2 {
-  margin: 0;
-  color: var(--text-bright);
-  font: 300 1.25rem/1.25 'Montserrat', sans-serif;
-}
-.price-container { display: flex; align-items: baseline; gap: 1rem; margin: 1rem 0 .25rem; }
-.original-price { color: var(--muted); text-decoration: line-through; font-size: .82rem; }
-.sale-price { color: var(--text-bright); font-size: 1.15rem; }
-.stock-info { color: var(--muted); font-size: .8rem; }
-.sale-product-card .add-to-cart-button, .view-all-button {
-  min-height: 48px;
-  border: 1px solid var(--accent);
-  background: transparent;
-  color: var(--text-bright);
-  cursor: pointer;
-  text-decoration: none;
-  transition: color .25s ease, background .25s ease;
-}
-.sale-product-card .add-to-cart-button { width: 100%; margin-top: auto; }
-.sale-product-card .add-to-cart-button:hover, .view-all-button:hover { background: var(--accent); color: var(--ink); }
-.view-all-button { display: inline-flex; align-items: center; gap: .75rem; padding: 0 1.5rem; }
-@media (max-width: 900px) { .sale-products { grid-template-columns: 1fr; } }
-@media (max-width: 600px) {
-  .homepage-container { padding: 2rem 1rem 4rem; }
-  .sale-banner { min-height: 55vh; padding: 2rem 1.25rem; }
-  .sale-banner::after { top: 1rem; right: 1rem; }
+.homepage-container { width: min(1320px, 100%); margin: auto; padding: 24px 40px 0; }
+.sale-banner { display: grid; grid-template-columns: 1fr 1.1fr; min-height: 320px; padding-bottom: 24px; border-bottom: 1px solid var(--line); gap: 24px; }
+.hero-copy { padding: 18px 8px 18px 0; }
+.sale-banner h1 { margin: 0; font: 400 clamp(34px, 4.2vw, 60px)/1.06 Georgia, serif; letter-spacing: -.04em; }
+.sale-banner h1 em { color: var(--accent); }
+.hero-intro { color: var(--muted); max-width: 370px; margin: 16px 0 22px; font-size: 14px; }
+.hero-photo { position: relative; min-height: 270px; border-radius: 160px 160px 4px 4px; overflow: hidden; }
+.hero-photo>img { position: absolute; width: 100%; height: 100%; object-fit: cover; }
+.image-caption { position: absolute; bottom: 16px; left: 16px; right: 16px; padding: 12px 16px; display: flex; justify-content: space-between; gap: 12px; background: #fff5e8f2; font-size: 12px; }
+.image-caption a { text-decoration: none; }
+.benefits { display: flex; justify-content: space-between; gap: 16px; padding: 15px 0; border-bottom: 1px solid var(--line); font-size: 11px; color: var(--muted); }
+.home-story { display: grid; grid-template-columns: .6fr 1fr 1fr; gap: 24px; padding: 24px; margin-bottom: 24px; background: linear-gradient(115deg,#f1dfc9,#e9cba4); box-shadow: inset 3px 0 var(--rust); }
+.home-story h2 { font: 28px/1.15 Georgia, serif; letter-spacing: -.035em; color: #79331e; margin: 0; }
+.home-story>p:not(.eyebrow) { font-size: 13px; color: var(--muted); margin: 0; }
+.home-story>a { grid-column: 3; font-size: 12px; color: #79331e; }
+@media(max-width:900px) { .homepage-container { padding: 24px 24px 0; } .home-story { grid-template-columns: 1fr 1fr; } .home-story>.eyebrow { grid-column: 1 / -1; margin: 0; } .home-story>a { grid-column: 2; } }
+@media(max-width:600px) {
+  .homepage-container { padding: 16px 16px 0; }
+  .sale-banner { grid-template-columns: 1fr; min-height: 0; gap: 0; padding-bottom: 0; border: 0; }
+  .hero-copy { padding: 4px 0 20px; }
+  .sale-banner h1 { font-size: 32px; line-height: 1.03; }
+  .hero-intro { font-size: 12px; margin: 10px 0 12px; }
+  .hero-photo { height: 112px; min-height: 112px; border-radius: 50px 50px 4px 4px; }
+  .hero-photo>img { object-position: center 52%; }
+  .image-caption { bottom: 8px; left: 10px; right: 10px; padding: 6px 10px; font-size: 10px; }
+  .benefits { display: none; }
+  .home-story { grid-template-columns: 1fr; gap: 14px; padding: 20px; }
+  .home-story>a { grid-column: auto; }
 }

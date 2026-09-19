@@ -1,4 +1,4 @@
 .toast-container { position: fixed; right: 2rem; bottom: 2rem; z-index: 2000; }
-.toast-message { display: flex; align-items: center; gap: .75rem; padding: 1rem 1.25rem; border: 1px solid rgba(155, 199, 176, .45); background: #0d201b; color: #cfe5d8; box-shadow: 0 18px 50px rgba(0,0,0,.35); animation: slideUp .25s ease-out; }
+.toast-message { display: flex; align-items: center; gap: .75rem; padding: 1rem 1.25rem; border: 1px solid var(--line); background: var(--text); color: var(--ink); box-shadow: 0 18px 50px rgba(0,0,0,.35); animation: slideUp .25s ease-out; }
 @keyframes slideUp { from { transform: translateY(12px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 @media (max-width: 600px) { .toast-container { right: 1rem; bottom: 1rem; left: 1rem; } }
