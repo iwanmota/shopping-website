@@ -1,0 +1,15 @@
+node_modules
+server/node_modules
+dist
+coverage
+server/coverage
+playwright-report
+test-results
+package-lock.json
+server/package-lock.json
+public
+
+# Historical planning documents
+.kiro
+.cursorrules.md
+DEVELOPMENT.md

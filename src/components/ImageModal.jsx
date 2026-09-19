@@ -21,53 +21,44 @@ import './ImageModal.css';
  * @returns {React.ReactElement|null} Image modal component or null when closed
  */
 const ImageModal = ({ image, alt, isOpen, onClose }) => {
-    const panel = useModalFocus(isOpen, onClose);
+  const panel = useModalFocus(isOpen, onClose);
 
-    // Don't render anything if modal is closed
-    if (!isOpen) return null;
+  // Don't render anything if modal is closed
+  if (!isOpen) return null;
 
-    /**
-     * Prevent click events from bubbling to the overlay
-     *
-     * This prevents the modal from closing when clicking on the content
-     *
-     * @param {React.MouseEvent} e - Click event object
-     */
-    const handleContentClick = (e) => {
-        e.stopPropagation();
-    };
-
-    return (
-        <div
-            className="image-modal-overlay"
-            onClick={onClose}
+  return (
+    <div
+      className="image-modal-overlay"
+      role="presentation"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+    >
+      <div
+        className="image-modal-content"
+        ref={panel}
+        role="dialog"
+        aria-modal="true"
+        aria-label={alt}
+        tabIndex={-1}
+      >
+        {/* Close button */}
+        <button
+          className="close-button"
+          aria-label="Close product image"
+          onClick={(e) => {
+            e.stopPropagation();
+            onClose();
+          }}
         >
-            <div
-                className="image-modal-content"
-                ref={panel} role="dialog" aria-modal="true" aria-label={alt} tabIndex={-1}
-                onClick={handleContentClick}
-            >
-                {/* Close button */}
-                <button
-                    className="close-button" aria-label="Close product image"
-                    onClick={(e) => {
-                        e.stopPropagation();
-                        onClose();
-                    }}
-                >
-                    <span aria-hidden="true">×</span>
-                </button>
+          <span aria-hidden="true">×</span>
+        </button>
 
-                {/* Full-size product image */}
-                <img
-                    src={image}
-                    alt={alt}
-                    className="full-size-image"
-                    onClick={(e) => e.stopPropagation()}
-                />
-            </div>
-        </div>
-    );
+        {/* Full-size product image */}
+        <img src={image} alt={alt} className="full-size-image" />
+      </div>
+    </div>
+  );
 };
 
 export default ImageModal;

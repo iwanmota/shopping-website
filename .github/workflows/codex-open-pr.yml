@@ -1,0 +1,43 @@
+name: Open Codex pull request
+on:
+  workflow_dispatch:
+    inputs:
+      head:
+        description: Existing codex/ branch
+        required: true
+      base:
+        description: Base branch
+        default: main
+        required: true
+      title:
+        description: Pull request title
+        required: true
+      body:
+        description: Pull request description
+        required: true
+permissions:
+  contents: read
+jobs:
+  open:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create repository-scoped App token
+        uses: actions/create-github-app-token@v2
+        id: app
+        with:
+          app-id: ${{ vars.CODEX_APP_ID }}
+          private-key: ${{ secrets.CODEX_APP_PRIVATE_KEY }}
+          permission-contents: read
+          permission-pull-requests: write
+      - name: Open PR as the Codex App
+        env:
+          GH_TOKEN: ${{ steps.app.outputs.token }}
+          GH_REPO: ${{ github.repository }}
+          PR_HEAD: ${{ inputs.head }}
+          PR_BASE: ${{ inputs.base }}
+          PR_TITLE: ${{ inputs.title }}
+          PR_BODY: ${{ inputs.body }}
+        run: |
+          [[ "$PR_HEAD" == codex/* ]] || { echo 'Head must use the codex/ prefix'; exit 1; }
+          gh pr create --head "$PR_HEAD" --base "$PR_BASE" --title "$PR_TITLE" --body "$PR_BODY"

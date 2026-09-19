@@ -3,7 +3,6 @@
  */
 
 const sqlite3 = require('sqlite3').verbose();
-const path = require('path');
 const { DATABASE_PATH } = require('./config/database');
 
 // Connect to SQLite database
@@ -11,14 +10,14 @@ const db = new sqlite3.Database(DATABASE_PATH);
 
 // Query to get table info
 db.all(`PRAGMA table_info(products)`, (err, rows) => {
-    if (err) {
-        console.error('Error querying table schema:', err);
-        return;
-    }
+  if (err) {
+    console.error('Error querying table schema:', err);
+    return;
+  }
 
-    console.log('Products table schema:');
-    console.log(rows);
+  console.log('Products table schema:');
+  console.log(rows);
 
-    // Close the database connection
-    db.close();
+  // Close the database connection
+  db.close();
 });

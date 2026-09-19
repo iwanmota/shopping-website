@@ -5,7 +5,8 @@
   "scripts": {
     "test": "jest",
     "test:watch": "jest --watch",
-    "start": "node server.js"
+    "start": "node server.js",
+    "test:coverage": "jest --runInBand --coverage"
   },
   "keywords": [],
   "author": "",
@@ -26,5 +27,19 @@
   "devDependencies": {
     "jest": "^30.0.5",
     "supertest": "^7.2.2"
+  },
+  "jest": {
+    "collectCoverageFrom": [
+      "**/*.js",
+      "!tests/**",
+      "!coverage/**",
+      "!node_modules/**",
+      "!testAdminApi.js"
+    ],
+    "coverageReporters": [
+      "text",
+      "json-summary",
+      "lcov"
+    ]
   }
 }
