@@ -11,7 +11,7 @@ const regularProduct = {
   image: '/images/products/smartwatch.jpg',
   isOnSale: 0,
   salePrice: null,
-  onSaleQuantity: 0
+  onSaleQuantity: 0,
 };
 
 test('does not render the numeric sale flag for a regular product', () => {

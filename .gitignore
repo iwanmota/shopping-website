@@ -36,3 +36,6 @@ yarn-error.log*
 *.db-journal
 
 # Package lock files are intentionally tracked for reproducible installs.
+/server/coverage
+/playwright-report
+/test-results

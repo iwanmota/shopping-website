@@ -3,7 +3,7 @@ import path from 'path';
 
 const headerCss = fs.readFileSync(path.join(__dirname, 'Header.css'), 'utf8');
 
-test('header uses the shared cinematic palette tokens', () => {
-  expect(headerCss).toMatch(/\.logo h1\s*\{[^}]*color:\s*var\(--text-bright\);/s);
-  expect(headerCss).toMatch(/\.main-nav a::after[^}]*background:\s*var\(--accent\);/s);
+test('header keeps navigation and account controls accessible on narrow screens', () => {
+  expect(headerCss).toMatch(/\.main-nav\s*\{[^}]*order:\s*3;/s);
+  expect(headerCss).toMatch(/\.header-content\s*\{[^}]*flex-wrap:\s*wrap;/s);
 });

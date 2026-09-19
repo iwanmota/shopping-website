@@ -15,6 +15,7 @@ concurrency:
 jobs:
   frontend:
     name: Frontend tests and build
+    timeout-minutes: 15
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
@@ -27,14 +28,36 @@ jobs:
           cache-dependency-path: package-lock.json
       - name: Install dependencies
         run: npm ci
-      - name: Run frontend tests
-        run: npm test
+      - name: Lint frontend and backend
+        run: npm run lint
+      - name: Check formatting
+        run: npm run format:check
+      - name: Run frontend tests with coverage
+        run: npm run test:coverage
+      - name: Save frontend coverage
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-coverage
+          path: coverage
+          retention-days: 14
+      - name: Install browser
+        run: npx playwright install --with-deps chromium
+      - name: Desktop and mobile smoke tests
+        run: npm run test:e2e
+      - name: Save browser report and failure traces
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: browser-report
+          path: |
+            playwright-report
+            test-results
+          retention-days: 14
       - name: Build frontend
         run: npm run build
       - name: Audit production dependencies
         run: npm audit --omit=dev --audit-level=high
-      - name: Check whitespace errors
-        run: git diff --check
 
   backend:
     name: Backend tests and audit
@@ -56,9 +79,14 @@ jobs:
         env:
           JWT_SECRET: ci-test-secret
           NODE_ENV: test
-        run: npm test -- --runInBand
+        run: npm run test:coverage
       - name: Audit production dependencies
         working-directory: server
         run: npm audit --omit=dev --audit-level=high
-      - name: Check whitespace errors
-        run: git diff --check
+      - name: Save backend coverage
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-coverage
+          path: server/coverage
+          retention-days: 14

@@ -1,9 +1,9 @@
 /**
  * Registration Form Component
- * 
+ *
  * Provides a form for new user registration with validation.
  * Handles form submission, password strength validation, and error display.
- * 
+ *
  * @component
  */
 import React, { useState } from 'react';
@@ -12,14 +12,18 @@ import './LoginForm.css'; // Reusing the same styles
 
 /**
  * RegistrationForm component for user registration
- * 
+ *
  * @param {Object} props - Component props
  * @param {Function} props.onSuccess - Callback function called after successful registration
  * @param {Function} props.onLoginClick - Handler function to switch to login form
  * @param {boolean} props.allowAdminCreation - Whether to allow admin role selection
  * @returns {React.ReactElement} Registration form component
  */
-const RegistrationForm = ({ onSuccess, onLoginClick, allowAdminCreation = false }) => {
+const RegistrationForm = ({
+  onSuccess,
+  onLoginClick,
+  allowAdminCreation = false,
+}) => {
   // Form state
   const [formData, setFormData] = useState({
     email: '',
@@ -27,37 +31,37 @@ const RegistrationForm = ({ onSuccess, onLoginClick, allowAdminCreation = false 
     confirmPassword: '',
     firstName: '',
     lastName: '',
-    role: 'customer'
+    role: 'customer',
   });
   const [formErrors, setFormErrors] = useState({});
-  
+
   // Get authentication context
   const { register, error, loading, clearError } = useAuth();
 
   /**
    * Handle input change
-   * 
+   *
    * @param {Event} e - Input change event
    */
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
-    
+
     // Clear specific error when field is edited
     if (formErrors[name]) {
-      setFormErrors(prev => ({
+      setFormErrors((prev) => ({
         ...prev,
-        [name]: undefined
+        [name]: undefined,
       }));
     }
   };
 
   /**
    * Check password strength
-   * 
+   *
    * @param {string} password - Password to check
    * @returns {boolean} True if password meets strength requirements
    */
@@ -67,71 +71,73 @@ const RegistrationForm = ({ onSuccess, onLoginClick, allowAdminCreation = false 
     // - Lowercase letter
     // - Number
     // - Special character
-    const strongPasswordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    const strongPasswordRegex =
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
     return strongPasswordRegex.test(password);
   };
 
   /**
    * Validate form inputs
-   * 
+   *
    * @returns {boolean} True if form is valid, false otherwise
    */
   const validateForm = () => {
     const errors = {};
-    
+
     // Email validation
     if (!formData.email.trim()) {
       errors.email = 'Email is required';
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
       errors.email = 'Email is invalid';
     }
-    
+
     // Password validation
     if (!formData.password) {
       errors.password = 'Password is required';
     } else if (!checkPasswordStrength(formData.password)) {
-      errors.password = 'Password must be at least 8 characters and include uppercase, lowercase, number, and special character';
+      errors.password =
+        'Password must be at least 8 characters and include uppercase, lowercase, number, and special character';
     }
-    
+
     // Confirm password validation
     if (formData.password !== formData.confirmPassword) {
       errors.confirmPassword = 'Passwords do not match';
     }
-    
+
     // Name validation (optional fields)
     if (formData.firstName && formData.firstName.length > 50) {
       errors.firstName = 'First name is too long';
     }
-    
+
     if (formData.lastName && formData.lastName.length > 50) {
       errors.lastName = 'Last name is too long';
     }
-    
+
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
   };
 
   /**
    * Handle form submission
-   * 
+   *
    * @param {Event} e - Form submit event
    */
   const handleSubmit = async (e) => {
     e.preventDefault();
     clearError();
-    
+
     // Validate form
     if (!validateForm()) {
       return;
     }
-    
+
     try {
       // Remove confirmPassword from data sent to API
       const { confirmPassword, ...registrationData } = formData;
-      
+
       // Attempt registration
       await register(registrationData);
-      
+
       // Call success callback if provided
       if (onSuccess) {
         onSuccess();
@@ -145,7 +151,7 @@ const RegistrationForm = ({ onSuccess, onLoginClick, allowAdminCreation = false 
   return (
     <div className="auth-form-container">
       <h2>Create Account</h2>
-      
+
       <form className="auth-form" onSubmit={handleSubmit}>
         {/* Email field */}
         <div className="form-group">
@@ -161,9 +167,11 @@ const RegistrationForm = ({ onSuccess, onLoginClick, allowAdminCreation = false 
             autoComplete="email"
             required
           />
-          {formErrors.email && <div className="error-message">{formErrors.email}</div>}
+          {formErrors.email && (
+            <div className="error-message">{formErrors.email}</div>
+          )}
         </div>
-        
+
         {/* Password field */}
         <div className="form-group">
           <label htmlFor="password">Password *</label>
@@ -178,9 +186,11 @@ const RegistrationForm = ({ onSuccess, onLoginClick, allowAdminCreation = false 
             autoComplete="new-password"
             required
           />
-          {formErrors.password && <div className="error-message">{formErrors.password}</div>}
+          {formErrors.password && (
+            <div className="error-message">{formErrors.password}</div>
+          )}
         </div>
-        
+
         {/* Confirm Password field */}
         <div className="form-group">
           <label htmlFor="confirmPassword">Confirm Password *</label>
@@ -195,9 +205,11 @@ const RegistrationForm = ({ onSuccess, onLoginClick, allowAdminCreation = false 
             autoComplete="new-password"
             required
           />
-          {formErrors.confirmPassword && <div className="error-message">{formErrors.confirmPassword}</div>}
+          {formErrors.confirmPassword && (
+            <div className="error-message">{formErrors.confirmPassword}</div>
+          )}
         </div>
-        
+
         {/* First Name field */}
         <div className="form-group">
           <label htmlFor="firstName">First Name</label>
@@ -211,9 +223,11 @@ const RegistrationForm = ({ onSuccess, onLoginClick, allowAdminCreation = false 
             placeholder="Enter your first name"
             autoComplete="given-name"
           />
-          {formErrors.firstName && <div className="error-message">{formErrors.firstName}</div>}
+          {formErrors.firstName && (
+            <div className="error-message">{formErrors.firstName}</div>
+          )}
         </div>
-        
+
         {/* Last Name field */}
         <div className="form-group">
           <label htmlFor="lastName">Last Name</label>
@@ -227,9 +241,11 @@ const RegistrationForm = ({ onSuccess, onLoginClick, allowAdminCreation = false 
             placeholder="Enter your last name"
             autoComplete="family-name"
           />
-          {formErrors.lastName && <div className="error-message">{formErrors.lastName}</div>}
+          {formErrors.lastName && (
+            <div className="error-message">{formErrors.lastName}</div>
+          )}
         </div>
-        
+
         {/* Role selection (admin only) */}
         {allowAdminCreation && (
           <div className="form-group">
@@ -244,31 +260,25 @@ const RegistrationForm = ({ onSuccess, onLoginClick, allowAdminCreation = false 
               <option value="customer">Customer</option>
               <option value="admin">Administrator</option>
             </select>
-            {formErrors.role && <div className="error-message">{formErrors.role}</div>}
+            {formErrors.role && (
+              <div className="error-message">{formErrors.role}</div>
+            )}
           </div>
         )}
-        
+
         {/* Display authentication error */}
         {error && <div className="auth-error">{error}</div>}
-        
+
         {/* Submit button */}
-        <button 
-          type="submit" 
-          className="auth-button"
-          disabled={loading}
-        >
+        <button type="submit" className="auth-button" disabled={loading}>
           {loading ? 'Creating Account...' : 'Register'}
         </button>
       </form>
-      
+
       {/* Login link */}
       <div className="auth-switch">
         Already have an account?{' '}
-        <button 
-          type="button" 
-          className="text-button"
-          onClick={onLoginClick}
-        >
+        <button type="button" className="text-button" onClick={onLoginClick}>
           Login
         </button>
       </div>

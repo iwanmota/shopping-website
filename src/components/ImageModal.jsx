@@ -1,17 +1,18 @@
 /**
  * Image Modal Component
- * 
+ *
  * Displays a product image in a full-screen modal overlay.
  * Handles click events to close the modal and prevents body scrolling when open.
- * 
+ *
  * @component
  */
-import React, { useEffect } from 'react';
+import React from 'react';
+import useModalFocus from '../hooks/useModalFocus';
 import './ImageModal.css';
 
 /**
  * ImageModal component for displaying enlarged product images
- * 
+ *
  * @param {Object} props - Component props
  * @param {string} props.image - URL of the image to display
  * @param {string} props.alt - Alt text for the image
@@ -20,70 +21,44 @@ import './ImageModal.css';
  * @returns {React.ReactElement|null} Image modal component or null when closed
  */
 const ImageModal = ({ image, alt, isOpen, onClose }) => {
-    /**
-     * Control body scrolling based on modal state
-     * 
-     * Prevents the page from scrolling in the background when the modal is open
-     * Restores scrolling when the modal is closed or unmounted
-     */
-    useEffect(() => {
-        if (isOpen) {
-            // Prevent body scrolling when modal is open
-            document.body.style.overflow = 'hidden';
-        } else {
-            document.body.style.overflow = 'unset';
-        }
-        
-        // Cleanup function to ensure scrolling is restored when component unmounts
-        return () => {
-            document.body.style.overflow = 'unset';
-        };
-    }, [isOpen]);
+  const panel = useModalFocus(isOpen, onClose);
 
-    // Don't render anything if modal is closed
-    if (!isOpen) return null;
+  // Don't render anything if modal is closed
+  if (!isOpen) return null;
 
-    /**
-     * Prevent click events from bubbling to the overlay
-     * 
-     * This prevents the modal from closing when clicking on the content
-     * 
-     * @param {React.MouseEvent} e - Click event object
-     */
-    const handleContentClick = (e) => {
-        e.stopPropagation();
-    };
-
-    return (
-        <div 
-            className="image-modal-overlay" 
-            onClick={onClose}
+  return (
+    <div
+      className="image-modal-overlay"
+      role="presentation"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+    >
+      <div
+        className="image-modal-content"
+        ref={panel}
+        role="dialog"
+        aria-modal="true"
+        aria-label={alt}
+        tabIndex={-1}
+      >
+        {/* Close button */}
+        <button
+          className="close-button"
+          aria-label="Close product image"
+          onClick={(e) => {
+            e.stopPropagation();
+            onClose();
+          }}
         >
-            <div 
-                className="image-modal-content" 
-                onClick={handleContentClick}
-            >
-                {/* Close button */}
-                <button 
-                    className="close-button" 
-                    onClick={(e) => {
-                        e.stopPropagation();
-                        onClose();
-                    }}
-                >
-                    <i className="fas fa-times"></i>
-                </button>
-                
-                {/* Full-size product image */}
-                <img 
-                    src={image} 
-                    alt={alt} 
-                    className="full-size-image"
-                    onClick={(e) => e.stopPropagation()}
-                />
-            </div>
-        </div>
-    );
+          <span aria-hidden="true">×</span>
+        </button>
+
+        {/* Full-size product image */}
+        <img src={image} alt={alt} className="full-size-image" />
+      </div>
+    </div>
+  );
 };
 
-export default ImageModal; 
+export default ImageModal;

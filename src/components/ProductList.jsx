@@ -1,58 +1,130 @@
-/**
- * Product List Component
- * 
- * Displays a grid of product cards showing all available products.
- * This component is responsible for rendering the main product catalog.
- * 
- * @component
- */
-import React from 'react';
-import PropTypes from 'prop-types';
+import React, { useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import ProductCard from './ProductCard';
+import { filterProducts, productCategory } from '../utils/catalogue';
 import './ProductList.css';
 
-/**
- * ProductList component for displaying a collection of products
- * 
- * @param {Object} props - Component props
- * @param {Array} props.products - Array of product objects to display
- * @param {Function} props.onImageClick - Handler for product image clicks
- * @param {Function} props.showToast - Function to display notification messages
- * @returns {React.ReactElement} Grid of product cards
- */
-const ProductList = ({ products, onImageClick, showToast }) => {
-    return (
-        <div className="product-list">
-            {/* Map through products array and render a ProductCard for each */}
-            {products.map(product => (
-                <ProductCard 
-                    key={product.id} 
-                    product={product} 
-                    onImageClick={onImageClick}
-                    showToast={showToast}
-                />
-            ))}
-        </div>
+const ProductList = ({
+  products,
+  onImageClick,
+  showToast,
+  embedded = false,
+  loading = false,
+  error,
+  onRetry,
+}) => {
+  const [params, setParams] = useSearchParams();
+  const [query, setQuery] = useState('');
+  const categories = ['All', ...new Set(products.map(productCategory)), 'Sale'];
+  const filter = categories.includes(params.get('filter'))
+    ? params.get('filter')
+    : 'All';
+  const visible = filterProducts(products, filter, query);
+  const changeFilter = (value) => {
+    setParams(
+      (previous) => {
+        const next = new URLSearchParams(previous);
+        if (value === 'All') next.delete('filter');
+        else next.set('filter', value);
+        return next;
+      },
+      { replace: true }
     );
+  };
+  const Heading = embedded ? 'h2' : 'h1';
+  return (
+    <section
+      className={`catalogue${embedded ? ' catalogue-embedded' : ''}`}
+      id="collection"
+      aria-labelledby="collection-title"
+    >
+      <div className="collection-heading">
+        <div>
+          <p className="eyebrow">The ShopSmart selection</p>
+          <Heading id="collection-title">
+            {embedded
+              ? 'Small upgrades, big difference.'
+              : 'Find your everyday.'}
+          </Heading>
+        </div>
+        <span className="selection-count" aria-live="polite">
+          {loading
+            ? 'Loading collection…'
+            : `${visible.length} considered essential${visible.length === 1 ? '' : 's'}`}
+        </span>
+      </div>
+      <div className="shop-tools">
+        <div
+          className="category-filters"
+          role="group"
+          aria-label="Filter products"
+        >
+          {categories.map((category) => (
+            <button
+              key={category}
+              onClick={() => changeFilter(category)}
+              aria-pressed={filter === category}
+            >
+              {category === 'Sale' ? 'On sale' : category}
+            </button>
+          ))}
+        </div>
+        <label className="catalogue-search">
+          <span className="sr-only">Search products</span>
+          <input
+            type="search"
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            placeholder="Search the collection"
+          />
+        </label>
+      </div>
+      {loading ? (
+        <p className="collection-status" role="status">
+          Loading your collection…
+        </p>
+      ) : error ? (
+        <div className="collection-status" role="alert">
+          <p>We couldn't load the collection. Please try again.</p>
+          <button className="primary-button" onClick={onRetry}>
+            Try again
+          </button>
+        </div>
+      ) : (
+        <>
+          <div className="product-list">
+            {visible.map((product) => (
+              <ProductCard
+                key={product.id}
+                product={product}
+                onImageClick={onImageClick}
+                showToast={showToast}
+              />
+            ))}
+          </div>
+          {visible.length === 0 && (
+            <div className="collection-status">
+              <p>
+                {products.length
+                  ? 'No matching essentials. Try another search or category.'
+                  : 'New essentials are on their way. Check back soon.'}
+              </p>
+              {products.length > 0 && (
+                <button
+                  className="primary-button"
+                  onClick={() => {
+                    setQuery('');
+                    changeFilter('All');
+                  }}
+                >
+                  Clear filters
+                </button>
+              )}
+            </div>
+          )}
+        </>
+      )}
+    </section>
+  );
 };
-
-/**
- * PropTypes for type checking and documentation
- * 
- * Defines the expected shape of the products array and required functions
- */
-ProductList.propTypes = {
-    products: PropTypes.arrayOf(
-        PropTypes.shape({
-            id: PropTypes.number.isRequired,
-            image: PropTypes.string.isRequired,
-            name: PropTypes.string.isRequired,
-            price: PropTypes.number.isRequired,
-            description: PropTypes.string.isRequired,
-        })
-    ).isRequired,
-    onImageClick: PropTypes.func.isRequired,
-    showToast: PropTypes.func.isRequired,
-};
-
 export default ProductList;

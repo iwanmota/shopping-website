@@ -1,6 +1,6 @@
 /**
  * Authentication Middleware
- * 
+ *
  * This module provides middleware functions for JWT-based authentication
  * and authorization in Express routes.
  */
@@ -8,7 +8,9 @@
 const jwt = require('jsonwebtoken');
 
 // Secret key for JWT signing and verification
-const JWT_SECRET = process.env.JWT_SECRET || (process.env.NODE_ENV === 'test' ? 'test-only-secret' : null);
+const JWT_SECRET =
+  process.env.JWT_SECRET ||
+  (process.env.NODE_ENV === 'test' ? 'test-only-secret' : null);
 if (!JWT_SECRET) {
   throw new Error('JWT_SECRET environment variable is required');
 }
@@ -18,7 +20,7 @@ const TOKEN_EXPIRATION = '24h';
 
 /**
  * Generates a JWT token for a user
- * 
+ *
  * @param {Object} user - User object containing id, email, and role
  * @returns {string} JWT token
  */
@@ -26,7 +28,7 @@ const generateToken = (user) => {
   const payload = {
     id: user.id,
     email: user.email,
-    role: user.role
+    role: user.role,
   };
 
   return jwt.sign(payload, JWT_SECRET, { expiresIn: TOKEN_EXPIRATION });
@@ -34,7 +36,7 @@ const generateToken = (user) => {
 
 /**
  * Middleware to verify JWT token and attach user to request
- * 
+ *
  * @param {Object} req - Express request object
  * @param {Object} res - Express response object
  * @param {Function} next - Express next function
@@ -63,7 +65,7 @@ const authenticateToken = (req, res, next) => {
 
 /**
  * Middleware to check if user has admin role
- * 
+ *
  * @param {Object} req - Express request object
  * @param {Object} res - Express response object
  * @param {Function} next - Express next function
@@ -83,7 +85,7 @@ const requireAdmin = (req, res, next) => {
 
 /**
  * Middleware to handle authentication errors
- * 
+ *
  * @param {Error} err - Error object
  * @param {Object} req - Express request object
  * @param {Object} res - Express response object
@@ -101,5 +103,5 @@ module.exports = {
   generateToken,
   authenticateToken,
   requireAdmin,
-  authErrorHandler
+  authErrorHandler,
 };

@@ -1,22 +1,16 @@
 /**
  * File Upload Middleware
- * 
+ *
  * This module provides middleware for handling file uploads using multer.
  * It includes validation for file types, sizes, and secure storage.
  */
 
 const multer = require('multer');
-const path = require('path');
-const crypto = require('crypto');
-const { 
-  generateUniqueFilename, 
-  getAbsoluteImagePath,
-  PRODUCT_IMAGES_UPLOADS_DIR 
+const {
+  generateUniqueFilename,
+  PRODUCT_IMAGES_UPLOADS_DIR,
 } = require('../utils/fileStorage');
-const { 
-  MAX_FILE_SIZE, 
-  ALLOWED_IMAGE_TYPES 
-} = require('../config/fileStorage');
+const { MAX_FILE_SIZE, ALLOWED_IMAGE_TYPES } = require('../config/fileStorage');
 
 // Configure multer storage
 const storage = multer.diskStorage({
@@ -28,7 +22,7 @@ const storage = multer.diskStorage({
     // Generate unique filename using our utility function
     const uniqueFilename = generateUniqueFilename(file.originalname);
     cb(null, uniqueFilename);
-  }
+  },
 });
 
 // File filter function to validate file types
@@ -37,7 +31,9 @@ const fileFilter = (req, file, cb) => {
   if (ALLOWED_IMAGE_TYPES.includes(file.mimetype)) {
     cb(null, true);
   } else {
-    const error = new Error('Invalid file type. Only JPEG, PNG, WebP, and GIF images are allowed.');
+    const error = new Error(
+      'Invalid file type. Only JPEG, PNG, WebP, and GIF images are allowed.'
+    );
     error.code = 'INVALID_FILE_TYPE';
     cb(error, false);
   }
@@ -49,8 +45,8 @@ const upload = multer({
   fileFilter: fileFilter,
   limits: {
     fileSize: MAX_FILE_SIZE,
-    files: 1 // Only allow one file at a time
-  }
+    files: 1, // Only allow one file at a time
+  },
 });
 
 /**
@@ -68,36 +64,36 @@ const handleUploadError = (error, req, res, next) => {
       case 'LIMIT_FILE_SIZE':
         return res.status(400).json({
           error: 'File too large',
-          message: `File size must be less than ${MAX_FILE_SIZE / (1024 * 1024)}MB`
+          message: `File size must be less than ${MAX_FILE_SIZE / (1024 * 1024)}MB`,
         });
       case 'LIMIT_FILE_COUNT':
         return res.status(400).json({
           error: 'Too many files',
-          message: 'Only one file can be uploaded at a time'
+          message: 'Only one file can be uploaded at a time',
         });
       case 'LIMIT_UNEXPECTED_FILE':
         return res.status(400).json({
           error: 'Unexpected field',
-          message: 'File must be uploaded in the "image" field'
+          message: 'File must be uploaded in the "image" field',
         });
       default:
         return res.status(400).json({
           error: 'Upload error',
-          message: error.message
+          message: error.message,
         });
     }
   } else if (error && error.code === 'INVALID_FILE_TYPE') {
     return res.status(400).json({
       error: 'Invalid file type',
-      message: error.message
+      message: error.message,
     });
   }
-  
+
   // If it's not a multer error, pass it to the next error handler
   next(error);
 };
 
 module.exports = {
   uploadSingleImage,
-  handleUploadError
+  handleUploadError,
 };

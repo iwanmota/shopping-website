@@ -1,6 +1,6 @@
 /**
  * File Storage Tests
- * 
+ *
  * This file contains tests for the file storage utilities.
  */
 
@@ -14,7 +14,7 @@ const {
   extractFilenameFromPath,
   PRODUCT_IMAGES_BASE_DIR,
   PRODUCT_IMAGES_UPLOADS_DIR,
-  PRODUCT_IMAGES_THUMBNAILS_DIR
+  PRODUCT_IMAGES_THUMBNAILS_DIR,
 } = require('../utils/fileStorage');
 
 describe('File Storage Utilities', () => {

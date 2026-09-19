@@ -1,6 +1,6 @@
 /**
  * Test Script for Product Management API
- * 
+ *
  * This script tests all the product management API endpoints:
  * 1. Login to get a bearer token
  * 2. List products with filtering and pagination
@@ -18,7 +18,7 @@ const API_URL = 'http://localhost:3001/api';
 // Admin credentials
 const adminCredentials = {
   email: 'admin@shopsmart.com',
-  password: 'admin123'
+  password: 'admin123',
 };
 
 // Test data for product creation
@@ -30,7 +30,7 @@ const newProduct = {
   isOnSale: false,
   regularInventory: 100,
   onSaleQuantity: 0,
-  lowStockThreshold: 10
+  lowStockThreshold: 10,
 };
 
 // Test data for product update
@@ -39,7 +39,7 @@ const productUpdate = {
   price: 24.99,
   isOnSale: true,
   salePrice: 19.99,
-  onSaleQuantity: 50
+  onSaleQuantity: 50,
 };
 
 // Store the token and created product ID
@@ -52,7 +52,10 @@ let createdProductId;
 async function login() {
   try {
     console.log('1. Logging in as admin...');
-    const response = await axios.post(`${API_URL}/auth/login`, adminCredentials);
+    const response = await axios.post(
+      `${API_URL}/auth/login`,
+      adminCredentials
+    );
     token = response.data.token;
     console.log('✅ Login successful');
     console.log(`Token: ${token.substring(0, 20)}...`);
@@ -72,22 +75,25 @@ async function listProducts() {
     const response = await axios.get(
       `${API_URL}/admin/products?search=&sort=name&order=asc&page=1&limit=5`,
       {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: { Authorization: `Bearer ${token}` },
       }
     );
-    
+
     const { products, pagination } = response.data;
     console.log('✅ Products retrieved successfully');
     console.log(`Total products: ${pagination.total}`);
     console.log(`Page ${pagination.page} of ${pagination.totalPages}`);
     console.log('Products:');
-    products.forEach(product => {
+    products.forEach((product) => {
       console.log(`- ${product.id}: ${product.name} ($${product.price})`);
     });
-    
+
     return products;
   } catch (error) {
-    console.error('❌ Failed to list products:', error.response?.data || error.message);
+    console.error(
+      '❌ Failed to list products:',
+      error.response?.data || error.message
+    );
   }
 }
 
@@ -97,25 +103,27 @@ async function listProducts() {
 async function createProduct() {
   try {
     console.log('\n3. Creating a new product...');
-    const response = await axios.post(
-      `${API_URL}/admin/products`,
-      newProduct,
-      {
-        headers: { 
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      }
-    );
-    
+    const response = await axios.post(`${API_URL}/admin/products`, newProduct, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+    });
+
     createdProductId = response.data.product?.id || response.data.productId;
     console.log('✅ Product created successfully');
     console.log(`Product ID: ${createdProductId}`);
-    console.log('Product details:', response.data.product || 'Details not returned');
-    
+    console.log(
+      'Product details:',
+      response.data.product || 'Details not returned'
+    );
+
     return createdProductId;
   } catch (error) {
-    console.error('❌ Failed to create product:', error.response?.data || error.message);
+    console.error(
+      '❌ Failed to create product:',
+      error.response?.data || error.message
+    );
   }
 }
 
@@ -125,19 +133,19 @@ async function createProduct() {
 async function getProduct(id) {
   try {
     console.log(`\n4. Getting product with ID ${id}...`);
-    const response = await axios.get(
-      `${API_URL}/admin/products/${id}`,
-      {
-        headers: { Authorization: `Bearer ${token}` }
-      }
-    );
-    
+    const response = await axios.get(`${API_URL}/admin/products/${id}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
     console.log('✅ Product retrieved successfully');
     console.log('Product details:', response.data);
-    
+
     return response.data;
   } catch (error) {
-    console.error('❌ Failed to get product:', error.response?.data || error.message);
+    console.error(
+      '❌ Failed to get product:',
+      error.response?.data || error.message
+    );
   }
 }
 
@@ -151,19 +159,25 @@ async function updateProduct(id) {
       `${API_URL}/admin/products/${id}`,
       productUpdate,
       {
-        headers: { 
+        headers: {
           Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
+          'Content-Type': 'application/json',
+        },
       }
     );
-    
+
     console.log('✅ Product updated successfully');
-    console.log('Updated product details:', response.data.product || response.data);
-    
+    console.log(
+      'Updated product details:',
+      response.data.product || response.data
+    );
+
     return response.data;
   } catch (error) {
-    console.error('❌ Failed to update product:', error.response?.data || error.message);
+    console.error(
+      '❌ Failed to update product:',
+      error.response?.data || error.message
+    );
   }
 }
 
@@ -173,19 +187,19 @@ async function updateProduct(id) {
 async function deleteProduct(id) {
   try {
     console.log(`\n6. Deleting product with ID ${id}...`);
-    const response = await axios.delete(
-      `${API_URL}/admin/products/${id}`,
-      {
-        headers: { Authorization: `Bearer ${token}` }
-      }
-    );
-    
+    const response = await axios.delete(`${API_URL}/admin/products/${id}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
     console.log('✅ Product deleted successfully');
     console.log('Response:', response.data);
-    
+
     return response.data;
   } catch (error) {
-    console.error('❌ Failed to delete product:', error.response?.data || error.message);
+    console.error(
+      '❌ Failed to delete product:',
+      error.response?.data || error.message
+    );
   }
 }
 
@@ -194,39 +208,41 @@ async function deleteProduct(id) {
  */
 async function runTests() {
   console.log('=== PRODUCT MANAGEMENT API TEST ===');
-  
+
   // Step 1: Login
   await login();
-  
+
   // Step 2: List products
   await listProducts();
-  
+
   // Step 3: Create a product
   const productId = await createProduct();
-  
+
   if (productId) {
     // Step 4: Get the created product
     await getProduct(productId);
-    
+
     // Step 5: Update the product
     await updateProduct(productId);
-    
+
     // Step 6: Delete the product
     await deleteProduct(productId);
-    
+
     // Step 7: Verify deletion by trying to get the product again
     console.log('\n7. Verifying deletion...');
     try {
       await getProduct(productId);
     } catch (error) {
-      console.log('✅ Product was successfully deleted (404 Not Found expected)');
+      console.log(
+        '✅ Product was successfully deleted (404 Not Found expected)'
+      );
     }
   }
-  
+
   console.log('\n=== TEST COMPLETED ===');
 }
 
 // Run the tests
-runTests().catch(error => {
+runTests().catch((error) => {
   console.error('Unhandled error during tests:', error);
 });

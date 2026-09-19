@@ -1,4 +1,33 @@
-.image-modal-overlay { position: fixed; inset: 0; z-index: 2000; display: grid; place-items: center; padding: 3rem; background: rgba(1, 6, 10, .92); backdrop-filter: blur(12px); }
-.image-modal-content { position: relative; max-width: 85vw; max-height: 85vh; border: 1px solid var(--line); }
-.full-size-image { display: block; max-width: 85vw; max-height: 85vh; object-fit: contain; }
-.image-modal-content .close-button { position: absolute; top: -48px; right: 0; width: 44px; height: 40px; border: 1px solid var(--line); background: var(--ink); color: var(--text); cursor: pointer; }
+.image-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  display: grid;
+  place-items: center;
+  padding: 3rem;
+  background: rgba(1, 6, 10, 0.92);
+  backdrop-filter: blur(12px);
+}
+.image-modal-content {
+  position: relative;
+  max-width: 85vw;
+  max-height: 85vh;
+  border: 1px solid var(--line);
+}
+.full-size-image {
+  display: block;
+  max-width: 85vw;
+  max-height: 85vh;
+  object-fit: contain;
+}
+.image-modal-content .close-button {
+  position: absolute;
+  top: -48px;
+  right: 0;
+  width: 44px;
+  height: 40px;
+  border: 1px solid var(--line);
+  background: var(--ink);
+  color: var(--text);
+  cursor: pointer;
+}

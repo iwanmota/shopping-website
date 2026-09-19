@@ -1,6 +1,6 @@
 /**
  * Authentication Utilities
- * 
+ *
  * This module provides utility functions for authentication, including
  * password hashing and verification using bcrypt.
  */
@@ -12,7 +12,7 @@ const SALT_ROUNDS = 10;
 
 /**
  * Hashes a password using bcrypt
- * 
+ *
  * @param {string} password - The plain text password to hash
  * @returns {Promise<string>} A promise that resolves to the hashed password
  * @throws {Error} If hashing fails
@@ -29,7 +29,7 @@ const hashPassword = async (password) => {
 
 /**
  * Verifies a password against a hash
- * 
+ *
  * @param {string} password - The plain text password to verify
  * @param {string} hashedPassword - The hashed password to compare against
  * @returns {Promise<boolean>} A promise that resolves to true if the password matches, false otherwise
@@ -45,5 +45,5 @@ const verifyPassword = async (password, hashedPassword) => {
 
 module.exports = {
   hashPassword,
-  verifyPassword
+  verifyPassword,
 };
