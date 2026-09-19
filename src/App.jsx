@@ -7,7 +7,7 @@
  * The component fetches product data on mount and manages UI state for modals
  * and notifications.
  */
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Header from './components/Header';
 import Footer from './components/Footer';
@@ -26,6 +26,7 @@ import { CartProvider } from './context/CartContext';
 import { AuthProvider } from './context/AuthContext';
 
 const App = () => {
+  const bagButtonRef = useRef(null);
   // State for product data and loading status
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -99,7 +100,10 @@ const App = () => {
       <AuthProvider>
         <CartProvider>
           <div className="App">
-            <Header onCartClick={() => setIsCartOpen(true)} />
+            <Header
+              bagButtonRef={bagButtonRef}
+              onCartClick={() => setIsCartOpen(true)}
+            />
             <main id="main-content">
               <Routes>
                 <Route
@@ -173,6 +177,7 @@ const App = () => {
             </main>
             <Footer />
             <FloatingBag
+              bagButtonRef={bagButtonRef}
               onOpen={() => setIsCartOpen(true)}
               obscured={isCartOpen || imageModal.isOpen}
             />

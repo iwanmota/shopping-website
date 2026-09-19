@@ -1,20 +1,29 @@
-import React from 'react';
-import { useLocation } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
 import { useCart } from '../context/CartContext';
 import './FloatingBag.css';
 
-const FloatingBag = ({ onOpen, obscured }) => {
+const FloatingBag = ({ onOpen, obscured, bagButtonRef }) => {
   const { cartItems } = useCart();
-  const { pathname } = useLocation();
+  const [headerBagVisible, setHeaderBagVisible] = useState(true);
+  useEffect(() => {
+    const button = bagButtonRef.current;
+    if (!button) return;
+    const observer = new IntersectionObserver(([entry]) => {
+      setHeaderBagVisible(entry.isIntersecting);
+    });
+    observer.observe(button);
+    return () => observer.disconnect();
+  }, [bagButtonRef]);
+  const hidden = obscured || headerBagVisible;
   const count = cartItems.reduce((total, item) => total + item.quantity, 0);
-  if (pathname !== '/' || count === 0) return null;
+  if (count === 0) return null;
 
   return (
     <button
       className="floating-bag"
       onClick={onOpen}
-      aria-hidden={obscured}
-      tabIndex={obscured ? -1 : 0}
+      aria-hidden={hidden}
+      tabIndex={hidden ? -1 : 0}
       aria-label={`View shopping bag, ${count} ${count === 1 ? 'item' : 'items'}`}
       aria-haspopup="dialog"
     >

@@ -184,18 +184,18 @@ test('bag controls remain usable and contained at each viewport size', async ({
   await expect(dialog).toBeHidden();
 });
 
-test('homepage floating bag tracks quantities, opens the cart and disappears when empty', async ({
+test('floating bag follows header visibility, tracks quantities and hides when empty', async ({
   page,
 }) => {
   await page.goto('/');
   const floating = page.getByRole('button', { name: /^View shopping bag,/ });
   await expect(floating).toHaveCount(0);
   await page.getByRole('button', { name: 'Add Maple mug to bag' }).click();
+  await page.evaluate(() => window.scrollTo({ top: 0, behavior: 'instant' }));
+  await expect(page.locator('.cart-btn')).toBeInViewport();
+  await expect(floating).toHaveCount(0);
+  await scrollPastHeader(page);
   await expect(floating).toHaveAccessibleName('View shopping bag, 1 item');
-  await page.getByRole('button', { name: 'Add Maple mug to bag' }).click();
-  await expect(floating).toHaveAccessibleName('View shopping bag, 2 items');
-  await page.locator('.home-story').scrollIntoViewIfNeeded();
-  await expect(floating).toBeInViewport();
   await floating.click();
   const dialog = page.getByRole('dialog');
   await expect(dialog).toBeVisible();
@@ -204,14 +204,16 @@ test('homepage floating bag tracks quantities, opens the cart and disappears whe
     .getByRole('button', { name: 'Increase Maple mug quantity' })
     .click();
   await page.keyboard.press('Escape');
-  await expect(floating).toHaveAccessibleName('View shopping bag, 3 items');
+  await expect(floating).toHaveAccessibleName('View shopping bag, 2 items');
   await expect(floating).toBeFocused();
+  await page.evaluate(() => window.scrollTo({ top: 0, behavior: 'instant' }));
+  await expect(floating).toHaveCount(0);
   await page
     .getByRole('navigation', { name: 'Main navigation' })
     .getByRole('link', { name: 'Our story' })
     .click();
-  await expect(floating).toHaveCount(0);
-  await page.goBack();
+  await scrollPastHeader(page);
+  await expect(floating).toBeInViewport();
   await floating.click();
   await dialog.getByRole('button', { name: 'Clear bag' }).click();
   await page.keyboard.press('Escape');
@@ -235,6 +237,7 @@ test('image quantity controls combine pricing tiers and remove full-price items 
   await add.click();
   await expect(card.locator('.product-bag-quantity')).toHaveText('2');
   await expect(page.getByRole('dialog')).toHaveCount(0);
+  await scrollPastHeader(page);
   await page
     .getByRole('button', { name: 'View shopping bag, 2 items' })
     .click();
@@ -276,6 +279,7 @@ test('bag survives reload and closing the page, and clearing persists', async ({
     )
     .toBe(2);
   await page.reload();
+  await scrollPastHeader(page);
   await expect(
     page.getByRole('button', { name: 'View shopping bag, 2 items' })
   ).toBeVisible();
@@ -286,6 +290,7 @@ test('bag survives reload and closing the page, and clearing persists', async ({
     route.fulfill({ json: products })
   );
   await reopened.goto(url);
+  await scrollPastHeader(reopened);
   await reopened
     .getByRole('button', { name: 'View shopping bag, 2 items' })
     .click();
@@ -305,3 +310,13 @@ test('bag survives reload and closing the page, and clearing persists', async ({
     reopened.getByRole('button', { name: /^View shopping bag,/ })
   ).toHaveCount(0);
 });
+
+async function scrollPastHeader(page) {
+  await page.evaluate(() => {
+    const header = document.querySelector('.main-header');
+    window.scrollTo({
+      top: header.getBoundingClientRect().bottom + window.scrollY + 20,
+      behavior: 'instant',
+    });
+  });
+}
