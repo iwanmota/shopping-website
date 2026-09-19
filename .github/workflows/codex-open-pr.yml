@@ -40,4 +40,4 @@ jobs:
           PR_BODY: ${{ inputs.body }}
         run: |
           [[ "$PR_HEAD" == codex/* ]] || { echo 'Head must use the codex/ prefix'; exit 1; }
-          gh pr create --head "$PR_HEAD" --base "$PR_BASE" --title "$PR_TITLE" --body "$PR_BODY"
+          gh pr create --head "$PR_HEAD" --base "$PR_BASE" --title "$PR_TITLE" --body "$PR_BODY" --reviewer iwanmota

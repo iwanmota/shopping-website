@@ -1,5 +1,8 @@
 # Separate Codex PR author
 
+Both the Actions workflow and local bootstrap script automatically request review from
+`iwanmota` after opening a PR. Requesting review does not approve or merge the PR.
+
 Hermes remains the independent advisory reviewer. The Codex App only opens PRs;
 it does not approve or merge them. Human approval and existing branch protections remain in place.
 
