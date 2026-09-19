@@ -65,6 +65,14 @@ try {
       base: pr.base.ref,
     })
   );
+  await api(
+    `/repos/${repo}/pulls/${pr.number}/requested_reviewers`,
+    token,
+    'POST',
+    {
+      reviewers: ['iwanmota'],
+    }
+  );
 } finally {
   await api('/installation/token', token, 'DELETE');
 }
