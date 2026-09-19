@@ -1,0 +1,51 @@
+.floating-bag {
+  position: fixed;
+  right: max(24px, env(safe-area-inset-right));
+  bottom: calc(24px + env(safe-area-inset-bottom));
+  z-index: 1100;
+  display: grid;
+  place-items: center;
+  width: 58px;
+  height: 58px;
+  padding: 0;
+  border: 1px solid var(--accent-dark);
+  border-radius: 50%;
+  background: var(--accent);
+  color: #fff8ed;
+  box-shadow: 0 5px 18px rgb(59 41 34 / 22%);
+  cursor: pointer;
+}
+.floating-bag[aria-hidden='true'] {
+  opacity: 0;
+  pointer-events: none;
+}
+.floating-bag:hover {
+  background: var(--accent-dark);
+}
+.floating-bag-count {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  display: grid;
+  place-items: center;
+  min-width: 25px;
+  height: 25px;
+  padding: 0 5px;
+  border: 2px solid var(--ink);
+  border-radius: 20px;
+  background: var(--text);
+  color: #fff8ed;
+  font-size: 11px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+/* Keep add-to-bag confirmations above the floating control. */
+.App:has(.floating-bag:not([aria-hidden='true'])) .toast-container {
+  bottom: calc(96px + env(safe-area-inset-bottom));
+}
+@media (max-width: 600px) {
+  .floating-bag {
+    right: max(20px, env(safe-area-inset-right));
+    bottom: calc(20px + env(safe-area-inset-bottom));
+  }
+}

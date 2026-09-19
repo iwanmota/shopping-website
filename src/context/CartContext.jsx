@@ -7,7 +7,9 @@
  * The implementation uses useReducer for state management with actions for different cart operations.
  * It also handles special logic for sale items with limited quantities.
  */
-import React, { createContext, useContext, useReducer } from 'react';
+import React, { createContext, useContext, useReducer, useEffect } from 'react';
+
+import { loadCart, saveCart } from './cartStorage';
 
 // Create context for cart state
 const CartContext = createContext();
@@ -132,8 +134,11 @@ export const cartReducer = (state, action) => {
  * @returns {React.ReactElement} Provider component
  */
 export const CartProvider = ({ children }) => {
-  // Initialize cart state with reducer
-  const [cartItems, dispatch] = useReducer(cartReducer, []);
+  // Restore the bag before the first render to avoid overwriting it with an empty state.
+  const [cartItems, dispatch] = useReducer(cartReducer, undefined, loadCart);
+  useEffect(() => {
+    saveCart(cartItems);
+  }, [cartItems]);
 
   /**
    * Add a product to the cart

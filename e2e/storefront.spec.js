@@ -183,3 +183,125 @@ test('bag controls remain usable and contained at each viewport size', async ({
   await close.click();
   await expect(dialog).toBeHidden();
 });
+
+test('homepage floating bag tracks quantities, opens the cart and disappears when empty', async ({
+  page,
+}) => {
+  await page.goto('/');
+  const floating = page.getByRole('button', { name: /^View shopping bag,/ });
+  await expect(floating).toHaveCount(0);
+  await page.getByRole('button', { name: 'Add Maple mug to bag' }).click();
+  await expect(floating).toHaveAccessibleName('View shopping bag, 1 item');
+  await page.getByRole('button', { name: 'Add Maple mug to bag' }).click();
+  await expect(floating).toHaveAccessibleName('View shopping bag, 2 items');
+  await page.locator('.home-story').scrollIntoViewIfNeeded();
+  await expect(floating).toBeInViewport();
+  await floating.click();
+  const dialog = page.getByRole('dialog');
+  await expect(dialog).toBeVisible();
+  await expect(floating).toHaveCount(0);
+  await dialog
+    .getByRole('button', { name: 'Increase Maple mug quantity' })
+    .click();
+  await page.keyboard.press('Escape');
+  await expect(floating).toHaveAccessibleName('View shopping bag, 3 items');
+  await expect(floating).toBeFocused();
+  await page
+    .getByRole('navigation', { name: 'Main navigation' })
+    .getByRole('link', { name: 'Our story' })
+    .click();
+  await expect(floating).toHaveCount(0);
+  await page.goBack();
+  await floating.click();
+  await dialog.getByRole('button', { name: 'Clear bag' }).click();
+  await page.keyboard.press('Escape');
+  await expect(floating).toHaveCount(0);
+});
+
+test('image quantity controls combine pricing tiers and remove full-price items first', async ({
+  page,
+}) => {
+  await page.route('**/api/products', (route) =>
+    route.fulfill({
+      json: [
+        { ...products[0], isOnSale: true, salePrice: 15, onSaleQuantity: 1 },
+      ],
+    })
+  );
+  await page.goto('/');
+  const card = page.getByRole('article');
+  const add = card.getByRole('button', { name: 'Add Maple mug to bag' });
+  await add.click();
+  await add.click();
+  await expect(card.locator('.product-bag-quantity')).toHaveText('2');
+  await expect(page.getByRole('dialog')).toHaveCount(0);
+  await page
+    .getByRole('button', { name: 'View shopping bag, 2 items' })
+    .click();
+  await expect(page.getByRole('dialog').locator('.cart-total')).toHaveText(
+    'Total:$35.00'
+  );
+  await page.keyboard.press('Escape');
+  await card
+    .getByRole('button', { name: 'Remove one Maple mug from bag' })
+    .click();
+  await page.getByRole('button', { name: 'View shopping bag, 1 item' }).click();
+  await expect(page.getByRole('dialog').locator('.cart-total')).toHaveText(
+    'Total:$15.00'
+  );
+  await page.keyboard.press('Escape');
+  await card
+    .getByRole('button', { name: 'Remove one Maple mug from bag' })
+    .click();
+  await expect(card.locator('.product-bag-quantity')).toHaveCount(0);
+  await expect(
+    page.getByRole('button', { name: /^View shopping bag,/ })
+  ).toHaveCount(0);
+  await expect(add).toBeVisible();
+});
+
+test('bag survives reload and closing the page, and clearing persists', async ({
+  page,
+  context,
+}) => {
+  await page.goto('/');
+  await page.getByRole('button', { name: 'Add Maple mug to bag' }).click();
+  await page.getByRole('button', { name: 'Add Maple mug to bag' }).click();
+  await expect
+    .poll(() =>
+      page.evaluate(
+        () =>
+          JSON.parse(localStorage.getItem('shopsmart.bag.v1')).items[0].quantity
+      )
+    )
+    .toBe(2);
+  await page.reload();
+  await expect(
+    page.getByRole('button', { name: 'View shopping bag, 2 items' })
+  ).toBeVisible();
+  const url = page.url();
+  await page.close();
+  const reopened = await context.newPage();
+  await reopened.route('http://localhost:3001/**', (route) =>
+    route.fulfill({ json: products })
+  );
+  await reopened.goto(url);
+  await reopened
+    .getByRole('button', { name: 'View shopping bag, 2 items' })
+    .click();
+  await expect(reopened.getByRole('dialog').locator('.cart-total')).toHaveText(
+    'Total:$40.00'
+  );
+  await reopened.getByRole('button', { name: 'Clear bag' }).click();
+  await expect
+    .poll(() =>
+      reopened.evaluate(
+        () => JSON.parse(localStorage.getItem('shopsmart.bag.v1')).items.length
+      )
+    )
+    .toBe(0);
+  await reopened.reload();
+  await expect(
+    reopened.getByRole('button', { name: /^View shopping bag,/ })
+  ).toHaveCount(0);
+});

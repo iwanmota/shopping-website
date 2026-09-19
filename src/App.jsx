@@ -11,6 +11,7 @@ import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Header from './components/Header';
 import Footer from './components/Footer';
+import FloatingBag from './components/FloatingBag';
 import Homepage from './components/Homepage';
 import ProductList from './components/ProductList';
 import About from './components/About';
@@ -171,6 +172,10 @@ const App = () => {
               </Routes>
             </main>
             <Footer />
+            <FloatingBag
+              onOpen={() => setIsCartOpen(true)}
+              obscured={isCartOpen || imageModal.isOpen}
+            />
 
             {/* Modals */}
             <CartModal
