@@ -1,107 +1,106 @@
-/**
- * About Page Component
- *
- * Displays information about the ShopSmart company, including its story,
- * values, and mission. This component provides users with background
- * information about the business.
- *
- * @component
- */
 import React from 'react';
 import { Link } from 'react-router-dom';
 import './About.css';
 
-/**
- * About component for displaying company information
- *
- * @returns {React.ReactElement} About page component
- */
-const About = () => {
-  return (
-    <div className="about-container">
-      {/* Page header section */}
-      <div className="about-header">
-        <h1>About ShopSmart</h1>
-        <div className="decorative-line"></div>
+const values = [
+  [
+    '01 / Sustainability',
+    'A lighter footprint.',
+    'Supporting eco-friendly Canadian suppliers and making more considered choices.',
+  ],
+  [
+    '02 / Community',
+    'Closer to home.',
+    'Building relationships with local communities and Canadian suppliers.',
+  ],
+  [
+    '03 / Quality',
+    'Worth choosing.',
+    'Carefully selecting useful products with everyday life in mind.',
+  ],
+  [
+    '04 / Canadian spirit',
+    'Everyone belongs.',
+    'Embracing the diversity and inclusivity that make our communities stronger.',
+  ],
+];
+
+const About = () => (
+  <div className="about-container">
+    <section className="about-introduction" aria-labelledby="about-title">
+      <div className="about-heading">
+        <p className="eyebrow">About ShopSmart / Rooted in Canada</p>
+        <h1 id="about-title">
+          Good things.
+          <br />
+          <em>Closer to home.</em>
+        </h1>
+        <p className="about-tagline">
+          Thoughtful essentials. A local spirit.
+          <br />A warmer way to shop online.
+        </p>
       </div>
+      <figure className="about-panorama">
+        <img
+          src="/images/about/concepts/packing-table.png"
+          alt="An illustrative scene of two people carefully packing an online order in warm afternoon light"
+          width="1536"
+          height="1024"
+        />
+        <figcaption>
+          <span>Everyday care, from our community to yours.</span>
+          <span>ShopSmart / Our story</span>
+        </figcaption>
+      </figure>
+    </section>
 
-      <div className="about-content">
-        {/* Main company image */}
-        <div className="about-image">
-          <img
-            src="/images/about/store-front-2.png"
-            alt="ShopSmart Store Front"
-            className="main-image"
-          />
-        </div>
-
-        <div className="about-text">
-          {/* Company story section */}
-          <h2>Our Story</h2>
-          <p>
-            Founded in the heart of Canada, ShopSmart is a proudly Canadian,
-            family-owned business committed to bringing you the finest selection
-            of products at the best prices. Our journey began with a simple
-            vision: to create a shopping experience that truly reflects Canadian
-            values of quality, honesty, and exceptional service.
-          </p>
-
-          {/* Company values grid */}
-          <div className="values-grid">
-            {/* Value card: Sustainability */}
-            <div className="value-card">
-              <i className="fas fa-leaf"></i>
-              <h3>Sustainable Choices</h3>
-              <p>
-                Supporting eco-friendly Canadian suppliers and reducing our
-                environmental footprint.
-              </p>
-            </div>
-
-            {/* Value card: Community */}
-            <div className="value-card">
-              <i className="fas fa-handshake"></i>
-              <h3>Community First</h3>
-              <p>
-                Building strong relationships with local communities and
-                Canadian suppliers.
-              </p>
-            </div>
-
-            {/* Value card: Quality */}
-            <div className="value-card">
-              <i className="fas fa-star"></i>
-              <h3>Quality Promise</h3>
-              <p>
-                Carefully selecting products that meet the highest Canadian
-                standards.
-              </p>
-            </div>
-
-            {/* Value card: Inclusivity */}
-            <div className="value-card">
-              <i className="fas fa-heart"></i>
-              <h3>Canadian Spirit</h3>
-              <p>Embracing diversity and inclusivity in everything we do.</p>
-            </div>
-          </div>
-
-          {/* Call to action section */}
-          <div className="about-cta">
-            <h2>Join Our Community</h2>
-            <p>
-              Discover why thousands of Canadians choose ShopSmart for their
-              everyday needs. We're more than just a store – we're your
-              neighborhood shopping destination.
-            </p>
-            <Link to="/products" className="learn-more-btn">
-              Explore the collection <span aria-hidden="true">↗</span>
-            </Link>
-          </div>
-        </div>
+    <section className="about-story" aria-labelledby="story-title">
+      <p className="eyebrow">Our story</p>
+      <h2 id="story-title">
+        A little more care.
+        <br />
+        <em>A lot more everyday.</em>
+      </h2>
+      <div className="about-story-copy">
+        <p>
+          Founded in the heart of Canada, ShopSmart is a family-owned online
+          shop built around a simple idea: everyday shopping can feel a little
+          more personal.
+        </p>
+        <p>
+          We bring together thoughtfully selected products, honest value, and a
+          connection to the communities around us. From your morning routine to
+          the things you reach for every day, we want to help you choose well.
+        </p>
       </div>
-    </div>
-  );
-};
+    </section>
+
+    <section className="about-values" aria-labelledby="values-title">
+      <div className="about-section-label">
+        <p className="eyebrow">What matters to us</p>
+        <h2 id="values-title">Thoughtful by nature.</h2>
+      </div>
+      <div className="about-value-grid">
+        {values.map(([label, title, description]) => (
+          <article key={label}>
+            <span>{label}</span>
+            <h3>{title}</h3>
+            <p>{description}</p>
+          </article>
+        ))}
+      </div>
+    </section>
+
+    <section className="about-cta" aria-labelledby="about-cta-title">
+      <div>
+        <p className="eyebrow">Make yourself at home</p>
+        <h2 id="about-cta-title">Find your next everyday favourite.</h2>
+      </div>
+      <Link to="/products" className="primary-button">
+        Explore the collection <span aria-hidden="true">↗</span>
+      </Link>
+    </section>
+  </div>
+);
 
 export default About;
