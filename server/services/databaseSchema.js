@@ -1,23 +1,27 @@
-const all = (db, sql) => new Promise((resolve, reject) => {
-  db.all(sql, (error, rows) => error ? reject(error) : resolve(rows));
-});
+const all = (db, sql) =>
+  new Promise((resolve, reject) => {
+    db.all(sql, (error, rows) => (error ? reject(error) : resolve(rows)));
+  });
 
-const run = (db, sql) => new Promise((resolve, reject) => {
-  db.run(sql, error => error ? reject(error) : resolve());
-});
+const run = (db, sql) =>
+  new Promise((resolve, reject) => {
+    db.run(sql, (error) => (error ? reject(error) : resolve()));
+  });
 
-const ensureProductInventorySchema = async db => {
+const ensureProductInventorySchema = async (db) => {
   const columns = await all(db, 'PRAGMA table_info(products)');
   if (columns.length === 0) {
-    throw new Error('Products table is missing. Run node server/initDb.js first.');
+    throw new Error(
+      'Products table is missing. Run node server/initDb.js first.'
+    );
   }
 
-  const existingColumns = new Set(columns.map(column => column.name));
+  const existingColumns = new Set(columns.map((column) => column.name));
   const requiredColumns = [
     ['regularInventory', 'INTEGER DEFAULT 0'],
     ['lowStockThreshold', 'INTEGER DEFAULT 5'],
     ['createdAt', 'TIMESTAMP'],
-    ['updatedAt', 'TIMESTAMP']
+    ['updatedAt', 'TIMESTAMP'],
   ];
 
   for (const [name, definition] of requiredColumns) {

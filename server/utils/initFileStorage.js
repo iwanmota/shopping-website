@@ -1,6 +1,6 @@
 /**
  * Initialize File Storage
- * 
+ *
  * This script ensures that all required directories for product images exist.
  * It should be run when the server starts.
  */

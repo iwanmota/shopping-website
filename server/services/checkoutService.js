@@ -1,13 +1,15 @@
-const get = (db, sql, params = []) => new Promise((resolve, reject) => {
-  db.get(sql, params, (error, row) => error ? reject(error) : resolve(row));
-});
-
-const run = (db, sql, params = []) => new Promise((resolve, reject) => {
-  db.run(sql, params, function(error) {
-    if (error) reject(error);
-    else resolve(this);
+const get = (db, sql, params = []) =>
+  new Promise((resolve, reject) => {
+    db.get(sql, params, (error, row) => (error ? reject(error) : resolve(row)));
   });
-});
+
+const run = (db, sql, params = []) =>
+  new Promise((resolve, reject) => {
+    db.run(sql, params, function (error) {
+      if (error) reject(error);
+      else resolve(this);
+    });
+  });
 
 class CheckoutError extends Error {
   constructor(message, status = 400) {
@@ -17,7 +19,7 @@ class CheckoutError extends Error {
   }
 }
 
-const validateItems = items => {
+const validateItems = (items) => {
   if (!Array.isArray(items) || items.length === 0) {
     throw new CheckoutError('Cart must contain at least one item');
   }
@@ -43,7 +45,9 @@ const checkoutCart = async (db, userId, items) => {
     const receiptItems = [];
 
     for (const item of items) {
-      const product = await get(db, 'SELECT * FROM products WHERE id = ?', [item.productId]);
+      const product = await get(db, 'SELECT * FROM products WHERE id = ?', [
+        item.productId,
+      ]);
       if (!product) {
         throw new CheckoutError(`Product ${item.productId} was not found`, 404);
       }
@@ -61,7 +65,10 @@ const checkoutCart = async (db, userId, items) => {
       );
 
       if (update.changes !== 1) {
-        throw new CheckoutError(`${product.name} does not have enough ${item.pricingTier} inventory`, 409);
+        throw new CheckoutError(
+          `${product.name} does not have enough ${item.pricingTier} inventory`,
+          409
+        );
       }
 
       const unitPrice = isSale ? product.salePrice : product.price;
@@ -71,7 +78,7 @@ const checkoutCart = async (db, userId, items) => {
         quantity: item.quantity,
         pricingTier: item.pricingTier,
         unitPrice,
-        subtotal: Number((unitPrice * item.quantity).toFixed(2))
+        subtotal: Number((unitPrice * item.quantity).toFixed(2)),
       });
     }
 
@@ -81,8 +88,10 @@ const checkoutCart = async (db, userId, items) => {
       id: `local-${Date.now()}`,
       userId,
       items: receiptItems,
-      total: Number(receiptItems.reduce((sum, item) => sum + item.subtotal, 0).toFixed(2)),
-      purchasedAt: new Date().toISOString()
+      total: Number(
+        receiptItems.reduce((sum, item) => sum + item.subtotal, 0).toFixed(2)
+      ),
+      purchasedAt: new Date().toISOString(),
     };
   } catch (error) {
     await run(db, 'ROLLBACK');
