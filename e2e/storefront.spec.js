@@ -50,7 +50,7 @@ test('search, bag totals, login guard and keyboard dismissal', async ({
     .click();
   await expect(dialog.locator('.cart-total')).toHaveText('Total:$40.00');
   await dialog.getByRole('button', { name: 'Proceed to Checkout' }).click();
-  await expect(dialog.getByRole('alert')).toHaveText(
+  await expect(dialog.getByRole('alert')).toContainText(
     'Please log in before checking out.'
   );
   await page.keyboard.press('Escape');
@@ -141,4 +141,45 @@ test('image dialog traps focus, ignores image clicks, and restores focus on Esca
   await page.keyboard.press('Escape');
   await expect(dialog).toBeHidden();
   await expect(trigger).toBeFocused();
+});
+
+test('bag controls remain usable and contained at each viewport size', async ({
+  page,
+}) => {
+  await page.goto('/products');
+  await page.getByRole('button', { name: 'Add Maple mug to bag' }).click();
+  await page
+    .getByRole('button', { name: 'Open shopping bag, 1 items' })
+    .click();
+  const dialog = page.getByRole('dialog');
+  const close = dialog.getByRole('button', { name: 'Close shopping bag' });
+  await expect(close).toBeFocused();
+  const decrease = dialog.getByRole('button', {
+    name: 'Decrease Maple mug quantity',
+  });
+  await expect(decrease).toBeDisabled();
+  await dialog
+    .getByRole('button', { name: 'Increase Maple mug quantity' })
+    .click();
+  await expect(dialog.locator('.bag-quantity')).toHaveText('2');
+  await decrease.click();
+  await expect(dialog.locator('.bag-quantity')).toHaveText('1');
+  const bounds = await dialog.boundingBox();
+  for (const button of await dialog.getByRole('button').all()) {
+    const box = await button.boundingBox();
+    expect(box.x).toBeGreaterThanOrEqual(bounds.x);
+    expect(box.x + box.width).toBeLessThanOrEqual(bounds.x + bounds.width + 1);
+    expect(box.y + box.height).toBeLessThanOrEqual(
+      bounds.y + bounds.height + 1
+    );
+  }
+  await dialog.getByRole('button', { name: 'Clear bag' }).click();
+  await expect(
+    dialog.getByText('Your bag is empty.', { exact: false })
+  ).toBeVisible();
+  await expect(
+    dialog.getByRole('button', { name: 'Proceed to Checkout' })
+  ).toHaveCount(0);
+  await close.click();
+  await expect(dialog).toBeHidden();
 });
