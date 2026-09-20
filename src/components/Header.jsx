@@ -5,7 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import Brand from './Brand';
 import './Header.css';
 
-const Header = ({ onCartClick }) => {
+const Header = ({ onCartClick, bagButtonRef }) => {
   const { cartItems } = useCart();
   const { isAuthenticated, user, logout } = useAuth();
   const navigate = useNavigate();
@@ -53,6 +53,7 @@ const Header = ({ onCartClick }) => {
             )}
             <button
               className="cart-btn"
+              ref={bagButtonRef}
               onClick={onCartClick}
               aria-label={`Open shopping bag, ${count} items`}
             >

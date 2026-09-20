@@ -1,53 +1,52 @@
-/**
- * Shopping Cart Modal Component
- *
- * Displays the current cart contents in a modal overlay.
- * Allows users to view items, adjust quantities, remove items, and proceed to checkout.
- *
- * @component
- */
 import React, { useState } from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { checkout } from '../services/checkout';
-import './CartModal.css';
 import useModalFocus from '../hooks/useModalFocus';
+import './CartModal.css';
 
-/**
- * CartModal component for displaying and managing cart contents
- *
- * @param {Object} props - Component props
- * @param {boolean} props.isOpen - Whether the modal is currently visible
- * @param {Function} props.onClose - Handler function to close the modal
- * @returns {React.ReactElement|null} Cart modal component or null when closed
- */
+const BagIcon = ({ type }) => (
+  <svg
+    width="18"
+    height="18"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1.7"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    aria-hidden="true"
+    focusable="false"
+  >
+    {type === 'close' ? (
+      <path d="m6 6 12 12M6 18 18 6" />
+    ) : type === 'minus' ? (
+      <path d="M5 12h14" />
+    ) : (
+      <path d="M5 12h14M12 5v14" />
+    )}
+  </svg>
+);
+
 const CartModal = ({ isOpen, onClose, onCheckoutSuccess }) => {
-  // Get cart state and functions from context
   const { cartItems, removeFromCart, updateQuantity, clearCart, cartTotal } =
     useCart();
   const { isAuthenticated, token } = useAuth();
+  const location = useLocation();
   const [checkoutError, setCheckoutError] = useState('');
   const [checkingOut, setCheckingOut] = useState(false);
-
   const panel = useModalFocus(isOpen, onClose);
-
-  // Don't render anything if modal is closed
   if (!isOpen) return null;
 
-  /**
-   * Format price to display with 2 decimal places
-   *
-   * @param {number} price - Price to format
-   * @returns {string} Formatted price with 2 decimal places
-   */
-  const formatPrice = (price) => price.toFixed(2);
-
+  const count = cartItems.reduce((total, item) => total + item.quantity, 0);
+  const money = (value) =>
+    value.toLocaleString('en-CA', { style: 'currency', currency: 'CAD' });
   const handleCheckout = async () => {
     if (!isAuthenticated) {
       setCheckoutError('Please log in before checking out.');
       return;
     }
-
     setCheckoutError('');
     setCheckingOut(true);
     try {
@@ -63,133 +62,170 @@ const CartModal = ({ isOpen, onClose, onCheckoutSuccess }) => {
 
   return (
     <div
-      className="modal-overlay"
+      className="modal-overlay bag-overlay"
       role="presentation"
-      onClick={(e) => {
-        if (e.target === e.currentTarget) onClose();
+      onClick={(event) => {
+        if (event.target === event.currentTarget) onClose();
       }}
     >
       <div
-        className="modal-content"
+        className="modal-content bag-panel"
         ref={panel}
         role="dialog"
         aria-modal="true"
         aria-labelledby="bag-title"
         tabIndex={-1}
       >
-        <div className="modal-header">
-          <h2 id="bag-title">Your shopping bag</h2>
-          <div className="header-actions">
-            {cartItems.length > 0 && (
-              <button className="clear-cart-button" onClick={clearCart}>
-                Clear Cart
-              </button>
-            )}
-            <button
-              className="close-button"
-              aria-label="Close shopping bag"
-              onClick={onClose}
-            >
-              <span aria-hidden="true">×</span>
-            </button>
+        <header className="bag-header">
+          <div>
+            <p className="bag-eyebrow">Thoughtfully selected</p>
+            <h2 id="bag-title">Your shopping bag</h2>
           </div>
+          <button
+            className="bag-close"
+            aria-label="Close shopping bag"
+            onClick={onClose}
+          >
+            <BagIcon type="close" />
+          </button>
+        </header>
+        <div className="bag-toolbar">
+          <span aria-live="polite">
+            {count} {count === 1 ? 'item' : 'items'}
+          </span>
+          {cartItems.length > 0 && (
+            <button
+              className="bag-text-button"
+              onClick={() => {
+                clearCart();
+                setCheckoutError('');
+              }}
+              disabled={checkingOut}
+            >
+              Clear bag
+            </button>
+          )}
         </div>
-
-        <div className="cart-items">
+        <div className="bag-items">
           {cartItems.length === 0 ? (
-            <p className="empty-cart">Your cart is empty</p>
+            <div className="bag-empty">
+              <svg
+                width="44"
+                height="44"
+                viewBox="0 0 32 32"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.2"
+                aria-hidden="true"
+              >
+                <path d="M7 10h18l2 18H5l2-18Z" />
+                <path d="M11 12V8a5 5 0 0 1 10 0v4" />
+              </svg>
+              <h3>A little room for something good.</h3>
+              <p>Your bag is empty. Find your next everyday favourite.</p>
+              <button className="bag-continue" onClick={onClose}>
+                Continue shopping <span aria-hidden="true">→</span>
+              </button>
+            </div>
           ) : (
             <ul>
               {cartItems.map((item) => (
-                <li key={item.lineId} className="cart-item">
-                  <div className="item-image">
-                    <img src={item.image} alt={item.name} />
-                  </div>
-                  <div className="item-info">
+                <li key={item.lineId} className="bag-item">
+                  <img className="bag-image" src={item.image} alt={item.name} />
+                  <div className="bag-item-details">
                     <h3>{item.name}</h3>
-                    <div className="price-details">
-                      <span className="unit-price">
-                        ${formatPrice(item.price)}
-                        {item.isOnSale && (
-                          <span className="sale-label">Sale Price</span>
-                        )}
-                      </span>
-                      <span className="quantity-price">
-                        × {item.quantity} = $
-                        {formatPrice(item.price * item.quantity)}
-                      </span>
+                    <p className="bag-unit-price">
+                      {money(item.price)} each{' '}
+                      {item.isOnSale && (
+                        <span className="bag-sale-label">Sale</span>
+                      )}
+                    </p>
+                    <div className="bag-item-controls">
+                      <div
+                        className="bag-stepper"
+                        role="group"
+                        aria-label={`${item.name}${item.isOnSale ? ', sale price' : ', regular price'} quantity`}
+                      >
+                        <button
+                          aria-label={`Decrease ${item.name} quantity`}
+                          onClick={() =>
+                            updateQuantity(item.lineId, item.quantity - 1)
+                          }
+                          disabled={item.quantity <= 1 || checkingOut}
+                        >
+                          <BagIcon type="minus" />
+                        </button>
+                        <span
+                          className="bag-quantity"
+                          aria-live="polite"
+                          aria-atomic="true"
+                        >
+                          {item.quantity}
+                        </span>
+                        <button
+                          aria-label={`Increase ${item.name} quantity`}
+                          onClick={() =>
+                            updateQuantity(item.lineId, item.quantity + 1)
+                          }
+                          disabled={checkingOut}
+                        >
+                          <BagIcon type="plus" />
+                        </button>
+                      </div>
+                      <button
+                        className="bag-remove"
+                        aria-label={`Remove ${item.name}`}
+                        onClick={() => removeFromCart(item.lineId)}
+                        disabled={checkingOut}
+                      >
+                        Remove
+                      </button>
                     </div>
                   </div>
-                  <div className="item-actions">
-                    {/* Quantity adjustment controls */}
-                    <div className="quantity-controls">
-                      <button
-                        aria-label={`Decrease ${item.name} quantity`}
-                        onClick={() =>
-                          updateQuantity(item.lineId, item.quantity - 1)
-                        }
-                        disabled={item.quantity <= 1}
-                      >
-                        -
-                      </button>
-                      <span>{item.quantity}</span>
-                      <button
-                        aria-label={`Increase ${item.name} quantity`}
-                        onClick={() =>
-                          updateQuantity(item.lineId, item.quantity + 1)
-                        }
-                      >
-                        +
-                      </button>
-                    </div>
-                    {/* Remove item button */}
-                    <button
-                      className="remove-button"
-                      aria-label={`Remove ${item.name}`}
-                      onClick={() => removeFromCart(item.lineId)}
-                    >
-                      <span aria-hidden="true">×</span>
-                    </button>
-                  </div>
+                  <span className="bag-line-total">
+                    {money(item.price * item.quantity)}
+                  </span>
                 </li>
               ))}
             </ul>
           )}
         </div>
-
-        {/* Cart summary and checkout section - only shown when cart has items */}
         {cartItems.length > 0 && (
-          <div className="modal-footer">
-            <div className="cart-summary">
-              <div className="cart-total">
-                <span>Total:</span>
-                <span>${formatPrice(cartTotal)}</span>
-              </div>
-              <div className="cart-savings">
-                {cartItems.some((item) => item.isOnSale) && (
-                  <span className="savings-text">
-                    Includes sale price savings!
-                  </span>
+          <footer className="bag-footer">
+            <div className="cart-total">
+              <span>Total:</span>
+              <span>{money(cartTotal)}</span>
+            </div>
+            <p className="bag-currency-note">All prices in Canadian dollars.</p>
+            {checkoutError && (
+              <div className="bag-error" role="alert">
+                <p>{checkoutError}</p>
+                {!isAuthenticated && (
+                  <Link
+                    to="/login"
+                    state={{ from: location.pathname + location.search }}
+                    onClick={onClose}
+                  >
+                    Log in to continue →
+                  </Link>
                 )}
               </div>
-            </div>
-            {checkoutError && (
-              <p className="checkout-error" role="alert">
-                {checkoutError}
-              </p>
             )}
             <button
-              className="checkout-button"
+              className="bag-checkout"
               onClick={handleCheckout}
               disabled={checkingOut}
             >
-              {checkingOut ? 'Processing...' : 'Proceed to Checkout'}
+              {checkingOut ? 'Processing…' : 'Proceed to Checkout'}
+              <span aria-hidden="true">→</span>
             </button>
-          </div>
+            <button className="bag-continue" onClick={onClose}>
+              Continue shopping
+            </button>
+          </footer>
         )}
       </div>
     </div>
   );
 };
-
 export default CartModal;

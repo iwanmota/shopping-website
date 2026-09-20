@@ -50,7 +50,7 @@ test('search, bag totals, login guard and keyboard dismissal', async ({
     .click();
   await expect(dialog.locator('.cart-total')).toHaveText('Total:$40.00');
   await dialog.getByRole('button', { name: 'Proceed to Checkout' }).click();
-  await expect(dialog.getByRole('alert')).toHaveText(
+  await expect(dialog.getByRole('alert')).toContainText(
     'Please log in before checking out.'
   );
   await page.keyboard.press('Escape');
@@ -142,3 +142,181 @@ test('image dialog traps focus, ignores image clicks, and restores focus on Esca
   await expect(dialog).toBeHidden();
   await expect(trigger).toBeFocused();
 });
+
+test('bag controls remain usable and contained at each viewport size', async ({
+  page,
+}) => {
+  await page.goto('/products');
+  await page.getByRole('button', { name: 'Add Maple mug to bag' }).click();
+  await page
+    .getByRole('button', { name: 'Open shopping bag, 1 items' })
+    .click();
+  const dialog = page.getByRole('dialog');
+  const close = dialog.getByRole('button', { name: 'Close shopping bag' });
+  await expect(close).toBeFocused();
+  const decrease = dialog.getByRole('button', {
+    name: 'Decrease Maple mug quantity',
+  });
+  await expect(decrease).toBeDisabled();
+  await dialog
+    .getByRole('button', { name: 'Increase Maple mug quantity' })
+    .click();
+  await expect(dialog.locator('.bag-quantity')).toHaveText('2');
+  await decrease.click();
+  await expect(dialog.locator('.bag-quantity')).toHaveText('1');
+  const bounds = await dialog.boundingBox();
+  for (const button of await dialog.getByRole('button').all()) {
+    const box = await button.boundingBox();
+    expect(box.x).toBeGreaterThanOrEqual(bounds.x);
+    expect(box.x + box.width).toBeLessThanOrEqual(bounds.x + bounds.width + 1);
+    expect(box.y + box.height).toBeLessThanOrEqual(
+      bounds.y + bounds.height + 1
+    );
+  }
+  await dialog.getByRole('button', { name: 'Clear bag' }).click();
+  await expect(
+    dialog.getByText('Your bag is empty.', { exact: false })
+  ).toBeVisible();
+  await expect(
+    dialog.getByRole('button', { name: 'Proceed to Checkout' })
+  ).toHaveCount(0);
+  await close.click();
+  await expect(dialog).toBeHidden();
+});
+
+test('floating bag follows header visibility, tracks quantities and hides when empty', async ({
+  page,
+}) => {
+  await page.goto('/');
+  const floating = page.getByRole('button', { name: /^View shopping bag,/ });
+  await expect(floating).toHaveCount(0);
+  await page.getByRole('button', { name: 'Add Maple mug to bag' }).click();
+  await page.evaluate(() => window.scrollTo({ top: 0, behavior: 'instant' }));
+  await expect(page.locator('.cart-btn')).toBeInViewport();
+  await expect(floating).toHaveCount(0);
+  await scrollPastHeader(page);
+  await expect(floating).toHaveAccessibleName('View shopping bag, 1 item');
+  await floating.click();
+  const dialog = page.getByRole('dialog');
+  await expect(dialog).toBeVisible();
+  await expect(floating).toHaveCount(0);
+  await dialog
+    .getByRole('button', { name: 'Increase Maple mug quantity' })
+    .click();
+  await page.keyboard.press('Escape');
+  await expect(floating).toHaveAccessibleName('View shopping bag, 2 items');
+  await expect(floating).toBeFocused();
+  await page.evaluate(() => window.scrollTo({ top: 0, behavior: 'instant' }));
+  await expect(floating).toHaveCount(0);
+  await page
+    .getByRole('navigation', { name: 'Main navigation' })
+    .getByRole('link', { name: 'Our story' })
+    .click();
+  await scrollPastHeader(page);
+  await expect(floating).toBeInViewport();
+  await floating.click();
+  await dialog.getByRole('button', { name: 'Clear bag' }).click();
+  await page.keyboard.press('Escape');
+  await expect(floating).toHaveCount(0);
+});
+
+test('image quantity controls combine pricing tiers and remove full-price items first', async ({
+  page,
+}) => {
+  await page.route('**/api/products', (route) =>
+    route.fulfill({
+      json: [
+        { ...products[0], isOnSale: true, salePrice: 15, onSaleQuantity: 1 },
+      ],
+    })
+  );
+  await page.goto('/');
+  const card = page.getByRole('article');
+  const add = card.getByRole('button', { name: 'Add Maple mug to bag' });
+  await add.click();
+  await add.click();
+  await expect(card.locator('.product-bag-quantity')).toHaveText('2');
+  await expect(page.getByRole('dialog')).toHaveCount(0);
+  await scrollPastHeader(page);
+  await page
+    .getByRole('button', { name: 'View shopping bag, 2 items' })
+    .click();
+  await expect(page.getByRole('dialog').locator('.cart-total')).toHaveText(
+    'Total:$35.00'
+  );
+  await page.keyboard.press('Escape');
+  await card
+    .getByRole('button', { name: 'Remove one Maple mug from bag' })
+    .click();
+  await page.getByRole('button', { name: 'View shopping bag, 1 item' }).click();
+  await expect(page.getByRole('dialog').locator('.cart-total')).toHaveText(
+    'Total:$15.00'
+  );
+  await page.keyboard.press('Escape');
+  await card
+    .getByRole('button', { name: 'Remove one Maple mug from bag' })
+    .click();
+  await expect(card.locator('.product-bag-quantity')).toHaveCount(0);
+  await expect(
+    page.getByRole('button', { name: /^View shopping bag,/ })
+  ).toHaveCount(0);
+  await expect(add).toBeVisible();
+});
+
+test('bag survives reload and closing the page, and clearing persists', async ({
+  page,
+  context,
+}) => {
+  await page.goto('/');
+  await page.getByRole('button', { name: 'Add Maple mug to bag' }).click();
+  await page.getByRole('button', { name: 'Add Maple mug to bag' }).click();
+  await expect
+    .poll(() =>
+      page.evaluate(
+        () =>
+          JSON.parse(localStorage.getItem('shopsmart.bag.v1')).items[0].quantity
+      )
+    )
+    .toBe(2);
+  await page.reload();
+  await scrollPastHeader(page);
+  await expect(
+    page.getByRole('button', { name: 'View shopping bag, 2 items' })
+  ).toBeVisible();
+  const url = page.url();
+  await page.close();
+  const reopened = await context.newPage();
+  await reopened.route('http://localhost:3001/**', (route) =>
+    route.fulfill({ json: products })
+  );
+  await reopened.goto(url);
+  await scrollPastHeader(reopened);
+  await reopened
+    .getByRole('button', { name: 'View shopping bag, 2 items' })
+    .click();
+  await expect(reopened.getByRole('dialog').locator('.cart-total')).toHaveText(
+    'Total:$40.00'
+  );
+  await reopened.getByRole('button', { name: 'Clear bag' }).click();
+  await expect
+    .poll(() =>
+      reopened.evaluate(
+        () => JSON.parse(localStorage.getItem('shopsmart.bag.v1')).items.length
+      )
+    )
+    .toBe(0);
+  await reopened.reload();
+  await expect(
+    reopened.getByRole('button', { name: /^View shopping bag,/ })
+  ).toHaveCount(0);
+});
+
+async function scrollPastHeader(page) {
+  await page.evaluate(() => {
+    const header = document.querySelector('.main-header');
+    window.scrollTo({
+      top: header.getBoundingClientRect().bottom + window.scrollY + 20,
+      behavior: 'instant',
+    });
+  });
+}
