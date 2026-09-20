@@ -1,0 +1,58 @@
+name: GitHub notifications to ntfy
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize, ready_for_review, closed]
+
+permissions:
+  contents: read
+
+jobs:
+  notify:
+    name: Publish PR notification
+    # This PoC uses repository secrets, so fork PRs are deliberately excluded.
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      # No checkout: PR code is never executed with the publishing credential.
+      - name: Send notification
+        env:
+          NTFY_TOKEN: ${{ secrets.NTFY_PUBLISH_TOKEN }}
+          REPOSITORY: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_ACTION: ${{ github.event.action }}
+          PR_MERGED: ${{ github.event.pull_request.merged }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          SERVER_URL: ${{ github.server_url }}
+        run: |
+          set -euo pipefail
+          if [ -z "$NTFY_TOKEN" ]; then
+            echo 'NTFY_PUBLISH_TOKEN is not configured.' >&2
+            exit 1
+          fi
+          action="$PR_ACTION"
+          if [ "$PR_ACTION" = closed ] && [ "$PR_MERGED" = true ]; then
+            action=merged
+          fi
+          jq -n \
+            --arg topic github \
+            --arg repo "$REPOSITORY" \
+            --arg number "$PR_NUMBER" \
+            --arg title "$PR_TITLE" \
+            --arg action "$action" \
+            --arg sha "$HEAD_SHA" \
+            --arg link "$SERVER_URL/$REPOSITORY/pull/$PR_NUMBER" \
+            '{topic:$topic,title:($repo + " #" + $number + " — " + $action),message:(($title | .[0:500]) + "\nEvent: " + $action + "\nCommit: " + $sha),click:$link,tags:["octocat"]}' \
+            > "$RUNNER_TEMP/ntfy-message.json"
+          # Header authentication keeps credentials out of URLs and notification bodies.
+          curl --fail --silent --show-error \
+            --connect-timeout 10 --max-time 30 \
+            --header "Authorization: Bearer $NTFY_TOKEN" \
+            --header 'Content-Type: application/json' \
+            --data-binary "@$RUNNER_TEMP/ntfy-message.json" \
+            https://ntfy.pilotstack.me \
+            --output "$RUNNER_TEMP/ntfy-response.json"
+          jq -e '.id and .topic == "github"' "$RUNNER_TEMP/ntfy-response.json" > /dev/null
+          jq '{id,topic,time}' "$RUNNER_TEMP/ntfy-response.json"
