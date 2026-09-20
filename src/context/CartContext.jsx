@@ -184,7 +184,7 @@ export const CartProvider = ({ children }) => {
    * Calculate total price of all items in cart
    */
   const cartTotal = cartItems.reduce(
-    (total, item) => total + item.price * item.quantity,
+    (total, item) => total + item.price,
     0
   );
 
