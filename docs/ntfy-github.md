@@ -37,9 +37,31 @@ a delivery, then revoke the old token. Never paste tokens into PRs, logs or chat
 The ACL/user/token records reside in ntfy's existing auth database mounted from
 `/mnt/app_config/ntfy/config`; include that location in infrastructure recovery.
 
-## Scope
+## Hermes server reviewer
 
-This is notification delivery only. It does not start Hermes, replace the existing
-AI review, or grant access to the private Hermes/Mattermost network. Automated review
-would require a separately implemented listener with event validation and deduplication;
-notification titles and PR content must never be treated as executable instructions.
+An outbound-only listener on the home server now consumes this topic. It checks
+allowlisted PRs against GitHub and invokes the owner Hermes container using
+`openai-codex` / `gpt-5.6-terra-900k`. It posts advisory COMMENT reviews through
+`hermes-iwanmota-app[bot]`; human approval remains required. The timer polls 60 seconds
+after each previous run finishes. There is no public Hermes callback endpoint.
+
+The former `hermes-pr-review.yml` workflow called OpenRouter directly from GitHub
+Actions. It is removed to avoid duplicate reviews and that workflow's API costs.
+The new reviewer uses the owner's existing Hermes provider authentication. Existing
+Actions secrets are retained for rollback; this change does not revoke them.
+
+The server skips draft, closed and fork PRs, deduplicates head/base revisions, and
+rechecks the revision before publication. The model has no tools and receives only
+PR metadata and a bounded diff. Notifications are wake-up hints; titles and PR
+content are untrusted. Only frontend/backend CI are required status checks; the
+reviewer is advisory and its absence is not approval.
+
+Operational details, input limits, retry handling, credentials and manual enqueue:
+[media-server reviewer runbook](https://github.com/iwanmota/media-server/blob/main/docs/runbooks/hermes-github-review.md).
+The disposable [acceptance PR #13](https://github.com/iwanmota/shopping-website/pull/13)
+exercises draft skipping, duplicate suppression and review delivery for a new commit.
+
+If the server is unavailable, queued notifications are limited by ntfy cache retention;
+after a prolonged outage, manually enqueue eligible PRs. Retargeting a PR or requesting
+a re-review does not currently emit a supported automatic event. To roll back, restore
+the previous Actions workflow from Git and disable the server's review timer.
